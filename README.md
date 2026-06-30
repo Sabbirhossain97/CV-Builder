@@ -8,6 +8,8 @@ This project is currently in development
 
 ## Overview
 
+![](https://photos.app.goo.gl/QRdLUxZCD3nLzde68)
+
 ![](https://github.com/Sabbirhossain97/NextJs_CV-Maker/assets/85300411/49485074-462c-4e28-9c86-3bb0614954fe)
 
 ## Functionality

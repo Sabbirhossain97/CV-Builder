@@ -1,5 +1,5 @@
-import Home from "../components/Home";
-import Navbar from "../components/Navbar";
+import Home from "../components/Home/Home";
+import Navbar from "../components/Navbar/Navbar"
 import Head from "next/head";
 import Box from "@mui/material/Box";
 import LoadingAnimation from "../components/StyleComponents/LoadingAnimation";

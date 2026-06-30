@@ -15,6 +15,8 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import { DataContext } from "../../pages/CVBuilder";
+import Stack from "@mui/material/Stack";
+import { AntSwitch } from "../helpers/helpers";
 
 export default function Language({
   deleteCustomSection,
@@ -22,37 +24,37 @@ export default function Language({
 }) {
   const getData = useContext(DataContext);
   const [expanded, setExpanded] = useState(false);
-  const handleChange = (panel) => (event, isExpanded) => {
+  const handleChange = (panel) => (_, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
   };
-  const [stateValue, setStateValue] = getData.value9;
+  const [languageDetails, setLanguageDetails] = getData.languages;
+  const [showLangLevel, setShowLangLevel] = getData.langLevel;
 
   const deleteAccordionSection = (id) => {
-    const result = stateValue.filter((item, key) => {
+    const result = languageDetails.filter((item, key) => {
       if (key !== id) {
         return item;
       }
     });
-    setStateValue(result);
+    setLanguageDetails(result);
   };
-  // const [toggleSwitch, setToggleSwitch] = useState(false);
 
   const addAccordionSection = () => {
-    setStateValue([
-      ...stateValue,
+    setLanguageDetails([
+      ...languageDetails,
       {
-        language: "",
+        name: "",
         level: "",
       },
     ]);
   };
   const handleInputChange = (e, inputKey) => {
     const { name, value } = e.target;
-    let clone = [...stateValue];
+    let clone = [...languageDetails];
     let obj = clone[inputKey];
     obj[name] = value;
     clone[inputKey] = obj;
-    setStateValue([...clone]);
+    setLanguageDetails([...clone]);
   };
 
   return (
@@ -73,17 +75,14 @@ export default function Language({
               marginTop: "7px",
               marginLeft: "5px",
               fontSize: "18px",
-              color: "white",
-              "&:hover": {
-                color: "#2196f3",
-                cursor: "pointer",
-              },
+              color: "red",
+              cursor: "pointer",
             }}
             onClick={() => {
               deleteCustomSection(sectionId);
-              setStateValue([
+              setLanguageDetails([
                 {
-                  language: "",
+                  name: "",
                   level: "",
                 },
               ]);
@@ -91,10 +90,27 @@ export default function Language({
           />
         </Grid>
       </Grid>
+      <Stack
+        direction="row"
+        spacing={1}
+        alignItems="center"
+        style={{ marginTop: "5px" }}
+      >
+        <AntSwitch
+          defaultChecked={!showLangLevel}
+          inputProps={{ "aria-label": "ant design" }}
+          onChange={() => {
+            setShowLangLevel(!showLangLevel);
+          }}
+        />
+        <Typography sx={{ fontSize: "15px" }}>
+          show language level
+        </Typography>
+      </Stack>
 
-      <Box sx={{ flexGrow: 1 }}>
-        {stateValue.map((item, key) => (
-          <Grid key={key} container columns={16}>
+      <Box sx={{ display: 'flex', flexDirection: "column", gap: '10px', flexGrow: 1 }}>
+        {languageDetails.map((language, key) => (
+          <Grid key={key} container columns={16} sx={{ display: 'flex', alignItems: 'center' }}>
             <Grid item xs={14} sm={15} md={15}>
               <Accordion
                 expanded={expanded === key}
@@ -112,8 +128,8 @@ export default function Language({
                   aria-controls="panel1bh-content"
                   id="panel1bh-header"
                 >
-                  <Typography sx={{ width: "33%", flexShrink: 0 }}>
-                    {item.language ? item.language : "(Not Specified)"}
+                  <Typography sx={{ width: "100%", flexShrink: 0 }}>
+                    {language.name ? language.name : "(Not Specified)"}
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
@@ -122,69 +138,57 @@ export default function Language({
                     rowSpacing={3}
                     columnSpacing={{ xs: 1, sm: 2, md: 3 }}
                   >
-                    <Grid item xs={16} md={6}>
+                    <Grid item xs={16} sm={6} md={6}>
                       <TextField
-                        id="outlined-basic"
+                        id="languagetitle"
                         label="Language"
                         type="text"
-                        name="language"
-                        value={stateValue.language}
-                        variant="filled"
+                        name="name"
+                        value={language.name}
                         sx={{
                           width: "100%",
-                          background: "#e7eaf4",
                           borderRadius: "5px",
-                        }}
-                        InputLabelProps={{
-                          sx: {
-                            color: "#828ba2",
-                          },
-                        }}
-                        InputProps={{
-                          disableUnderline: true,
                         }}
                         onChange={(e) => handleInputChange(e, key)}
                       />
                     </Grid>
-                    <Grid item xs={16} md={6}>
-                      <FormControl sx={{ width: "100%"}}>
+                    <Grid item xs={16} sm={6} md={6}>
+                      <FormControl sx={{ width: "100%" }}>
                         <InputLabel id="demo-simple-select-helper-label">
                           Level
                         </InputLabel>
                         <Select
-                          labelId="demo-simple-select-helper-label"
-                          id="demo-simple-select-helper"
+                          id="languagelevel"
                           label="level"
-                          defaultValue=""
-                          variant="filled"
                           name="level"
-                          value={stateValue.level}
-                          sx={{ background: "#e7eaf4", borderRadius: "5px" }}
-                          InputProps={{
-                            disableUnderline: true,
-                          }}
+                          disabled={showLangLevel ? true : false}
+                          value={language.level}
                           onChange={(e) => handleInputChange(e, key)}
                         >
                           {[
                             {
                               value: 0,
-                              name: "None",
+                              name: "Native",
                             },
                             {
                               value: 1,
-                              name: "Native speaker",
+                              name: "Beginner",
                             },
                             {
                               value: 2,
-                              name: "Highly proficient",
+                              name: "Intermediate",
                             },
                             {
                               value: 3,
-                              name: "Very good command",
+                              name: "Advanced",
+                            },
+                            {
+                              value: 4,
+                              name: "Fluent",
                             },
                           ].map((item, key) => (
                             <MenuItem
-                              defaultValue={stateValue.level}
+                              defaultValue={language.level}
                               value={item.name}
                               key={key}
                             >
@@ -199,41 +203,44 @@ export default function Language({
               </Accordion>
             </Grid>
             <Grid item md="auto">
-              <DeleteOutlineOutlinedIcon
+              {key > 0 && <DeleteOutlineOutlinedIcon
                 sx={{
-                  marginTop: "20px",
                   marginLeft: "5px",
-                  fontSize: "25px",
-                  color: "white",
-                  "&:hover": {
-                    color: "#2196f3",
-                    cursor: "pointer",
+                  fontSize: {
+                    xs: '20px',
+                    md: '25px'
                   },
+                  color: "red",
+                  cursor: "pointer"
                 }}
                 onClick={() => deleteAccordionSection(key)}
-              />
+              />}
             </Grid>
           </Grid>
         ))}
       </Box>
-      <Typography
-        sx={{
-          width: "94%",
-          fontWeight: "700",
-          marginTop: "10px",
-          padding: "5px",
-          display: "flex",
-          borderRadius: "5px",
-          "&:hover": {
-            backgroundColor: "#e3f2fd",
-            cursor: "pointer",
-          },
-        }}
-        color="primary"
-        onClick={addAccordionSection}
-      >
-        <AddIcon sx={{ fontSize: "20px" }} /> Add one more language
-      </Typography>
+      <Grid container columns={16} sx={{ display: 'flex', alignItems: 'center' }}>
+        <Grid item xs={14} sm={15} md={15}>
+          <Typography
+            sx={{
+              width: "100%",
+              fontWeight: "700",
+              marginTop: "10px",
+              padding: "5px",
+              display: "flex",
+              borderRadius: "5px",
+              "&:hover": {
+                backgroundColor: "#e3f2fd",
+                cursor: "pointer",
+              },
+            }}
+            color="primary"
+            onClick={addAccordionSection}
+          >
+            <AddIcon sx={{ fontSize: "20px" }} /> Add one more language
+          </Typography>
+        </Grid>
+      </Grid>
     </Box>
   );
 }

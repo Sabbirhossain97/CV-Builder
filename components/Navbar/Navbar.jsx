@@ -9,14 +9,14 @@ export default function Home() {
     <Box sx={{ flexGrow: 1, position: 'fixed', left: 0, right: 0, top: 0, zIndex: 1000 }}>
       <AppBar position="static"
         style={{
-          height: "70px",
+          height: "80px",
           width: "100%",
           display: "flex",
           justifyContent: "center",
           background: "linear-gradient(to right bottom, #64b5f6, #1565c0)"
         }}
       >
-        <Toolbar variant="dense" sx={{marginLeft: '65px'}}>
+        <Toolbar variant="dense" sx={{marginLeft: '20px'}}>
           <Image src="/favicon.ico" alt="error" width={45} height={45} />
           <Typography variant="h6" color="inherit" component="div"
             sx={{

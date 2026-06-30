@@ -1,22 +1,16 @@
 import * as React from "react";
-import { useState, useContext } from "react";
+import { useContext } from "react";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
-import Accordion from "@mui/material/Accordion";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import AccordionSummary from "@mui/material/AccordionSummary";
 import Typography from "@mui/material/Typography";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import TextField from "@mui/material/TextField";
 import { DataContext } from "../../pages/CVBuilder";
 
 export default function PersonalDetails() {
   const getData = useContext(DataContext);
-  const [expanded, setExpanded] = useState(false);
-  const handleChange = (panel) => (event, isExpanded) => {
-    setExpanded(isExpanded ? panel : false);
-  };
-  const [stateValue, setStateValue] = getData.value1;
+  const [stateValue, setStateValue] = getData.personalInformation;
+
+  const [completedSections, setCompletedSections] = getData.completed
 
   const handleInputChange = (e, inputKey) => {
     const { name, value } = e.target;
@@ -25,10 +19,31 @@ export default function PersonalDetails() {
     obj[name] = value;
     clone[inputKey] = obj;
     setStateValue([...clone]);
+    calculateProfileCompleteness();
   };
 
+  const calculateProfileCompleteness = () => {
+    const allfieldsCompleted = stateValue.every(entry => Object.values(entry).every(field => field !== ""))
+
+    if (allfieldsCompleted) {
+      if (!completedSections.sections.includes("personal Details")) {
+        setCompletedSections(prevState => ({
+          ...prevState,
+          sections: [...prevState.sections, "personal Details"]
+        }));
+      }
+    } else {
+      if (completedSections.sections.includes("personal Details")) {
+        setCompletedSections(prevState => ({
+          ...prevState,
+          sections: prevState.sections.filter(section => section !== "personal Details")
+        }));
+      }
+    }
+  }
+
   return (
-    <Box>
+    <Box >
       {stateValue.map((item, key) => (
         <Box key={key} style={{ marginTop: "40px" }}>
           <Typography
@@ -37,6 +52,7 @@ export default function PersonalDetails() {
               paddingBottom: "20px",
               fontWeight: "700",
               fontSize: "20px",
+              whiteSpace: "nowrap"
             }}
           >
             Personal Details
@@ -48,119 +64,96 @@ export default function PersonalDetails() {
             columnSpacing={{ xs: 3, sm: 2, md: 4 }}
             columns={15}
           >
-            <Grid item xs={7} md={7}>
+            <Grid item xs={15} sm={7} md={7}>
               <TextField
-                id="outlined-basic"
+                id="firstname"
                 label="First Name"
                 name="firstname"
-                variant="filled"
                 value={item.firstname}
                 type="text"
                 sx={{
                   width: "100%",
-                  background: "#e7eaf4",
                   borderRadius: "5px",
-                }}
-                InputLabelProps={{
-                  sx: {
-                    color: "#828ba2",
-                  },
-                }}
-                InputProps={{
-                  disableUnderline: true,
+                  
                 }}
                 onChange={(e) => handleInputChange(e, key)}
               />
             </Grid>
-            <Grid item xs={7} md={7}>
+            <Grid item xs={15} sm={7} md={7}>
               <TextField
-                id="outlined-basic"
+                id="lastname"
                 label="Last Name"
                 name="lastname"
-                variant="filled"
                 value={item.lastname}
                 type="text"
                 sx={{
                   width: "100%",
-                  background: "#e7eaf4",
                   borderRadius: "5px",
-                }}
-                InputLabelProps={{
-                  sx: {
-                    color: "#828ba2",
-                  },
-                }}
-                InputProps={{
-                  disableUnderline: true,
                 }}
                 onChange={(e) => handleInputChange(e, key)}
               />
             </Grid>
-            <Grid item xs={7} md={7}>
+            <Grid item xs={15} sm={7} md={7}>
               <TextField
-                id="outlined-basic"
+                id="email"
                 label="Email"
                 name="email"
-                variant="filled"
                 value={item.email}
-                type="text"
+                type="email"
                 sx={{
                   width: "100%",
-                  background: "#e7eaf4",
                   borderRadius: "5px",
                 }}
-                InputLabelProps={{
-                  sx: {
-                    color: "#828ba2",
-                  },
-                }}
                 InputProps={{
-                  disableUnderline: true,
+                  autoComplete: 'off'
                 }}
                 onChange={(e) => handleInputChange(e, key)}
               />
             </Grid>
-            <Grid item xs={7} md={7}>
+            <Grid item xs={15} sm={7} md={7}>
               <TextField
-                id="outlined-basic"
+                id="phone"
                 label="Phone"
                 name="phone"
-                variant="filled"
                 value={item.phone}
-                type="text"
+                type="tel"
                 sx={{
                   width: "100%",
-                  background: "#e7eaf4",
                   borderRadius: "5px",
                 }}
-                InputLabelProps={{
-                  sx: {
-                    color: "#828ba2",
-                  },
-                }}
                 InputProps={{
-                  disableUnderline: true,
+                  autoComplete: 'off'
                 }}
                 onChange={(e) => handleInputChange(e, key)}
               />
             </Grid>
-            <Grid item xs={7} md={7}>
+            <Grid item xs={15} sm={7} md={7}>
               <TextField
-                id="outlined-basic"
+                id="country"
                 label="Country"
                 name="country"
-                variant="filled"
                 value={item.country}
                 type="text"
                 sx={{
                   width: "100%",
-                  background: "#e7eaf4",
                   borderRadius: "5px",
                 }}
-                InputLabelProps={{
-                  sx: {
-                    color: "#828ba2",
-                  },
+                InputProps={{
+                  autoComplete: 'off'
+                }}
+                onChange={(e) => handleInputChange(e, key)}
+              />
+            </Grid>
+            <Grid item xs={15} sm={7} md={7}>
+              <TextField
+                id="city"
+                label="City"
+                name="city"
+                value={item.city}
+                type="text"
+                sx={{
+                  width: "100%",
+                  borderRadius: "5px",
                 }}
                 InputProps={{
                   disableUnderline: true,
@@ -168,23 +161,33 @@ export default function PersonalDetails() {
                 onChange={(e) => handleInputChange(e, key)}
               />
             </Grid>
-            <Grid item xs={7} md={7}>
+            <Grid item xs={15} sm={7} md={7}>
               <TextField
-                id="outlined-basic"
-                label="City"
-                name="city"
-                variant="filled"
-                value={item.city}
+                id="occupation"
+                label="Occupation"
+                name="occupation"
                 type="text"
+                value={item.occupation}
                 sx={{
                   width: "100%",
-                  background: "#e7eaf4",
                   borderRadius: "5px",
                 }}
-                InputLabelProps={{
-                  sx: {
-                    color: "#828ba2",
-                  },
+                InputProps={{
+                  disableUnderline: true,
+                }}
+                onChange={(e) => handleInputChange(e, key)}
+              />
+            </Grid>
+            <Grid item xs={15} sm={7} md={7}>
+              <TextField
+                id="postalcode"
+                label="Postal Code"
+                name="postalcode"
+                type="text"
+                value={item.postalcode}
+                sx={{
+                  width: "100%",
+                  borderRadius: "5px",
                 }}
                 InputProps={{
                   disableUnderline: true,
@@ -193,206 +196,6 @@ export default function PersonalDetails() {
               />
             </Grid>
           </Grid>
-
-          {/* <AdditionalDetails /> */}
-          <Box
-            sx={{
-              flexGrow: 1,
-              display: "flex",
-              flexDirection: "column",
-              marginLeft: "-15px",
-              marginTop: "25px",
-            }}
-          >
-            <Accordion
-              expanded={expanded === "panel1"}
-              onChange={handleChange("panel1")}
-              sx={{
-                backgroundColor: "white",
-                display: "flex",
-                flexDirection: "column-reverse",
-                boxShadow: "none",
-              }}
-            >
-              <AccordionSummary
-                sx={{ flexDirection: "row-reverse", width: "30%" }}
-                expandIcon={
-                  <ExpandMoreIcon color="primary" sx={{ display: "flex" }} />
-                }
-                aria-controls="panel1bh-content"
-                id="panel1bh-header"
-              >
-                <Typography
-                  sx={{
-                    flexShrink: 0,
-                    fontWeight: "700",
-                    borderRadius: "5px",
-                    width: "100%",
-                  }}
-                  color="primary"
-                >
-                  Edit additional details
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Grid
-                  container
-                  rowSpacing={5}
-                  columnSpacing={{ xs:3, sm: 2, md: 4 }}
-                  columns={15}
-                >
-                  <Grid item xs={7} md={7}>
-                    <TextField
-                      id="outlined-basic"
-                      label="Occupation"
-                      name="occupation"
-                      variant="filled"
-                      type="text"
-                      value={item.occupation}
-                      sx={{
-                        width: "102%",
-                        background: "#e7eaf4",
-                        borderRadius: "5px",
-                      }}
-                      InputLabelProps={{
-                        sx: {
-                          color: "#828ba2",
-                        },
-                      }}
-                      InputProps={{
-                        disableUnderline: true,
-                      }}
-                      onChange={(e) => handleInputChange(e, key)}
-                    />
-                  </Grid>
-                  <Grid item xs={7} md={7}>
-                    <TextField
-                      id="outlined-basic"
-                      label="Address"
-                      name="address"
-                      variant="filled"
-                      type="text"
-                      value={item.address}
-                      sx={{
-                        width: "102%",
-                        background: "#e7eaf4",
-                        borderRadius: "5px",
-                        marginLeft: "8px",
-                      }}
-                      InputLabelProps={{
-                        sx: {
-                          color: "#828ba2",
-                        },
-                      }}
-                      InputProps={{
-                        disableUnderline: true,
-                      }}
-                      onChange={(e) => handleInputChange(e, key)}
-                    />
-                  </Grid>
-                  <Grid item xs={7} md={7}>
-                    <TextField
-                      id="outlined-basic"
-                      label="Postal Code"
-                      name="postalcode"
-                      variant="filled"
-                      type="text"
-                      value={item.postalcode}
-                      sx={{
-                        width: "102%",
-                        background: "#e7eaf4",
-                        borderRadius: "5px",
-                      }}
-                      InputLabelProps={{
-                        sx: {
-                          color: "#828ba2",
-                        },
-                      }}
-                      InputProps={{
-                        disableUnderline: true,
-                      }}
-                      onChange={(e) => handleInputChange(e, key)}
-                    />
-                  </Grid>
-                  <Grid item xs={7} md={7}>
-                    <TextField
-                      id="outlined-basic"
-                      label="Nationality"
-                      name="nationality"
-                      variant="filled"
-                      type="text"
-                      value={item.nationality}
-                      sx={{
-                        width: "102%",
-                        background: "#e7eaf4",
-                        borderRadius: "5px",
-                        marginLeft: "8px",
-                      }}
-                      InputLabelProps={{
-                        sx: {
-                          color: "#828ba2",
-                        },
-                      }}
-                      InputProps={{
-                        disableUnderline: true,
-                      }}
-                      onChange={(e) => handleInputChange(e, key)}
-                    />
-                  </Grid>
-                  <Grid item xs={7} md={7}>
-                    <TextField
-                      id="outlined-basic"
-                      label="Place Of Birth"
-                      name="placeofbirth"
-                      variant="filled"
-                      type="text"
-                      value={item.placeofbirth}
-                      sx={{
-                        width: "102%",
-                        background: "#e7eaf4",
-                        borderRadius: "5px",
-                      }}
-                      InputLabelProps={{
-                        sx: {
-                          color: "#828ba2",
-                        },
-                      }}
-                      InputProps={{
-                        disableUnderline: true,
-                      }}
-                      onChange={(e) => handleInputChange(e, key)}
-                    />
-                  </Grid>
-                  <Grid item xs={7} md={7}>
-                    <TextField
-                      id="outlined-basic"
-                      label="Date Of Birth"
-                      name="dateofbirth"
-                      variant="filled"
-                      type="text"
-                      value={item.dateofbirth}
-                      sx={{
-                        width: "102%",
-                        background: "#e7eaf4",
-                        borderRadius: "5px",
-                        textDecoration: "none",
-                        marginLeft: "8px",
-                      }}
-                      InputLabelProps={{
-                        sx: {
-                          color: "#828ba2",
-                        },
-                      }}
-                      InputProps={{
-                        disableUnderline: true,
-                      }}
-                      onChange={(e) => handleInputChange(e, key)}
-                    />
-                  </Grid>
-                </Grid>
-              </AccordionDetails>
-            </Accordion>
-          </Box>
         </Box>
       ))}
     </Box>

@@ -1,11 +1,10 @@
-import * as React from "react";
 import { useState, useContext } from "react";
 import Typography from "@mui/material/Typography";
 import { Button } from "@mui/material";
 import Box from "@mui/material/Box";
+import AddIcon from "@mui/icons-material/Add";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
-import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -19,16 +18,18 @@ import { modalStyles } from "../helpers/helpers";
 
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
-export default function ExtraCurricular({
+export default function Projects({
   deleteCustomSection,
   sectionId,
 }) {
   const getData = useContext(DataContext);
   const [expanded, setExpanded] = useState(false);
+
   const handleChange = (panel) => (_, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
   };
-  const [extraCurricularDetails, setExtraCurricularDetails] = getData.extraCurricular;
+
+  const [projectDetails, setProjectDetails] = getData.project;
   const [disabledEditor, setDisabledEditor] = useState(false);
   const [openModal, setOpenModal] = useState(false);
 
@@ -44,40 +45,45 @@ export default function ExtraCurricular({
   const modules = {
     toolbar: [
       [{ 'list': 'bullet' }],
+      [{ 'link': 'link' }],
       ['clean']
     ],
   };
 
+  const customStyles = {
+    'link': {
+      color: 'blue',
+      textDecoration: 'underline'
+    }
+  };
+
   const deleteAccordionSection = (id) => {
-    const result = extraCurricularDetails.filter((item, key) => {
+    const result = projectDetails.filter((item, key) => {
       if (key !== id) {
         return item;
       }
     });
-    setExtraCurricularDetails(result);
+    setProjectDetails(result);
   };
 
   const addAccordionSection = () => {
-    setExtraCurricularDetails([
-      ...extraCurricularDetails,
+    setProjectDetails([
+      ...projectDetails,
       {
-        title: "",
-        institution: "",
+        projecttitle: "",
         startdate: "",
         enddate: "",
-        role: "",
         description: "",
       },
     ]);
   };
-
   const handleInputChange = (e, inputKey) => {
     const { name, value } = e.target;
-    let clone = [...extraCurricularDetails];
+    let clone = [...projectDetails];
     let obj = clone[inputKey];
     obj[name] = value;
     clone[inputKey] = obj;
-    setExtraCurricularDetails([...clone]);
+    setProjectDetails([...clone]);
   };
 
   const handleDescriptionChange = (index, value) => {
@@ -87,16 +93,16 @@ export default function ExtraCurricular({
     }
     else {
       setDisabledEditor(false)
-      const updatedActivites = [...extraCurricularDetails];
-      updatedActivites[index].description = value;
-      setExtraCurricularDetails(updatedActivites);
+      const updatedProjectDetails = [...projectDetails];
+      updatedProjectDetails[index].description = value;
+      setProjectDetails(updatedProjectDetails);
     }
   };
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", marginTop: "20px" }}>
-      <Grid container item md={8} >
-        <Grid container item md={8}>
+      <Grid container item md={6}>
+        <Grid container item md={4}>
           <Typography
             sx={{
               fontWeight: "700",
@@ -104,7 +110,7 @@ export default function ExtraCurricular({
               paddingBottom: "10px",
             }}
           >
-            Extra-curricular Activities
+            Projects
           </Typography>
           <DeleteOutlineOutlinedIcon
             sx={{
@@ -116,13 +122,11 @@ export default function ExtraCurricular({
             }}
             onClick={() => {
               deleteCustomSection(sectionId);
-              setExtraCurricularDetails([
+              setProjectDetails([
                 {
-                  title: "",
-                  institution: "",
+                  projecttitle: "",
                   startdate: "",
                   enddate: "",
-                  role: "",
                   description: "",
                 },
               ]);
@@ -156,7 +160,7 @@ export default function ExtraCurricular({
       </Modal>
 
       <Box sx={{ display: 'flex', flexDirection: "column", gap: '10px', flexGrow: 1 }}>
-        {extraCurricularDetails.map((activity, key) => (
+        {projectDetails.map((project, key) => (
           <Grid key={key} container columns={16} sx={{ display: 'flex', alignItems: 'center' }}>
             <Grid item xs={14} sm={15} md={15}>
               <Accordion
@@ -174,8 +178,8 @@ export default function ExtraCurricular({
                   aria-controls="panel1bh-content"
                   id="panel1bh-header"
                 >
-                  <Typography sx={{ width: "90%", flexShrink: 0 }}>
-                    {activity.title ? activity.title : "(Not Specified)"}
+                  <Typography sx={{ width: "100%", flexShrink: 0 }}>
+                    {project.projecttitle ? project.projecttitle : "(Not Specified)"}
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
@@ -184,77 +188,13 @@ export default function ExtraCurricular({
                     rowSpacing={3}
                     columnSpacing={{ xs: 1, sm: 2, md: 3 }}
                   >
-                    <Grid item xs={6} md={6}>
-                      <TextField
-                        id="activitytitle"
-                        label="Title"
-                        type="text"
-                        name="title"
-                        value={activity.title}
-                        sx={{
-                          width: "100%",
-                          borderRadius: "5px",
-                        }}
-                        InputProps={{
-                          disableUnderline: true,
-                        }}
-                        onChange={(e) => handleInputChange(e, key)}
-                      />
-                    </Grid>
-                    <Grid item xs={6} md={6}>
-                      <TextField
-                        id="activityinstitution"
-                        label="Institution or Organization"
-                        type="text"
-                        name="institution"
-                        value={activity.institution}
-                        sx={{
-                          width: "100%",
-                          borderRadius: "5px",
-                        }}
-
-                        InputProps={{
-                          disableUnderline: true,
-                        }}
-                        onChange={(e) => handleInputChange(e, key)}
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6} sx={{ display: "flex", gap: '20px' }}>
-                      {" "}
-                      <TextField
-                        id="activitystartdate"
-                        label="Start Date"
-                        name="startdate"
-                        value={activity.startdate}
-                        type="month"
-                        sx={{
-                          borderRadius: "5px",
-                          width: '50%'
-                        }}
-                        InputLabelProps={{ shrink: true }}
-                        onChange={(e) => handleInputChange(e, key)}
-                      />
-                      <TextField
-                        id="activityenddate"
-                        label="End Date"
-                        name="enddate"
-                        value={activity.enddate}
-                        type="month"
-                        sx={{
-                          width: '50%',
-                          borderRadius: "5px",
-                        }}
-                        InputLabelProps={{ shrink: true }}
-                        onChange={(e) => handleInputChange(e, key)}
-                      />
-                    </Grid>
                     <Grid item xs={16} md={6}>
                       <TextField
-                        id="activityrole"
-                        label="Role or Position"
+                        id="projecttitle"
+                        label="Project Title"
                         type="text"
-                        name="role"
-                        value={activity.role}
+                        value={project.projecttitle}
+                        name="projecttitle"
                         sx={{
                           width: "100%",
                           borderRadius: "5px",
@@ -262,16 +202,51 @@ export default function ExtraCurricular({
                         InputProps={{
                           disableUnderline: true,
                         }}
+                        onChange={(e) => handleInputChange(e, key)}
+                      />
+                    </Grid>
+                    <Grid item xs={16} sm={16} md={6} sx={{ display: "flex", flexDirection: { xs: 'column', sm: 'row' }, gap: '20px' }}>
+                      <TextField
+                        id="projectstartdate"
+                        label="Start Date"
+                        name="startdate"
+                        value={project.startdate}
+                        type="month"
+                        sx={{
+                          borderRadius: "5px",
+                          width: {
+                            xs: '100%',
+                            sm: '50%'
+                          }
+                        }}
+                        InputLabelProps={{ shrink: true }}
+                        onChange={(e) => handleInputChange(e, key)}
+                      />
+                      <TextField
+                        id="projectenddate"
+                        label="End Date"
+                        name="enddate"
+                        value={project.enddate}
+                        type="month"
+                        sx={{
+                          borderRadius: "5px",
+                          width: {
+                            xs: '100%',
+                            sm: '50%'
+                          }
+                        }}
+                        InputLabelProps={{ shrink: true }}
                         onChange={(e) => handleInputChange(e, key)}
                       />
                     </Grid>
                     <Grid item xs={16} md={12}>
-                      <Typography>Responsibilities or Achivements</Typography>
+                      <Typography>Description</Typography>
                       <ReactQuill
-                        style={{ marginTop: '10px', background: "#fff", borderRadius: '5px' }}
-                        value={activity.description}
+                        style={{ marginTop: '10px', background: "#fff" }}
+                        value={project.description}
                         modules={modules}
-                        formats={['list']}
+                        formats={['list', 'link']}
+                        styles={customStyles}
                         readOnly={disabledEditor}
                         onChange={(value) => handleDescriptionChange(key, value)}
                       />
@@ -304,8 +279,8 @@ export default function ExtraCurricular({
               width: "100%",
               fontWeight: "700",
               marginTop: "10px",
-              padding: "5px",
               display: "flex",
+              padding: "5px",
               borderRadius: "5px",
               "&:hover": {
                 backgroundColor: "#e3f2fd",
@@ -315,7 +290,7 @@ export default function ExtraCurricular({
             color="primary"
             onClick={addAccordionSection}
           >
-            <AddIcon sx={{ fontSize: "20px" }} /> Add one more activity
+            <AddIcon sx={{ fontSize: "20px" }} /> Add one more course
           </Typography>
         </Grid>
       </Grid>

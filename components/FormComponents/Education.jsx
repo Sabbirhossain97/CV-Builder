@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useState, useContext } from "react";
+import { Button, Checkbox, FormControlLabel } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
@@ -11,50 +12,153 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import { DataContext } from "../../pages/CVBuilder";
+import Modal from '@mui/material/Modal';
+import { modalStyles } from "../helpers/helpers";
 
 export default function Education() {
   const getData = useContext(DataContext);
-
   const [expanded, setExpanded] = useState(false);
-  const handleChange = (panel) => (event, isExpanded) => {
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("")
+  const handleChange = (panel) => (_, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
   };
 
-  const [stateValue, setStateValue] = getData.value4;
+  const [educationDetails, setEducationDetails] = getData.education;
+  const [completedSections, setCompletedSections] = getData.completed;
+
+  const showAlert = (message) => {
+    setAlertOpen(true);
+  };
+
+  const handleAlertClose = (_, reason) => {
+    if (reason === "clickaway") return;
+
+    setAlertOpen(false);
+  };
 
   const deleteAccordionSection = (id) => {
-    const result = stateValue.filter((item, key) => {
+    const result = educationDetails.filter((item, key) => {
       if (key !== id) {
         return item;
       }
     });
-    setStateValue(result);
+    setEducationDetails(result);
   };
 
   const addAccordionSection = () => {
-    setStateValue([
-      ...stateValue,
+    setEducationDetails([
+      ...educationDetails,
       {
         institution: "",
         degree: "",
         startdate: "",
         enddate: "",
+        ongoing: false,
         institutioncity: "",
-        description: "",
       },
     ]);
   };
-  const handleInputChange = (e, inputKey) => {
-    const { name, value } = e.target;
-    let clone = [...stateValue];
-    let obj = clone[inputKey];
-    obj[name] = value;
-    clone[inputKey] = obj;
-    setStateValue([...clone]);
+
+  const MIN_YEAR = 1900;
+  const currentYear = new Date().getFullYear();
+
+  const isValidYear = (year) => {
+    if (!year) return true; 
+
+    return (
+      /^\d{4}$/.test(year) &&
+      Number(year) >= MIN_YEAR &&
+      Number(year) <= currentYear
+    );
   };
 
+  const handleInputChange = (e, inputKey) => {
+    const { name, value, checked, type } = e.target;
+
+    const clone = [...educationDetails];
+    const currentEducation = { ...clone[inputKey] };
+
+    const isYearField = name === "startdate" || name === "enddate";
+
+    if (isYearField) {
+      if (!/^\d{0,4}$/.test(value)) {
+        return;
+      }
+
+      if (value.length === 4) {
+        const numericYear = Number(value);
+
+        if (numericYear < MIN_YEAR || numericYear > currentYear) {
+          showAlert(`Please enter a valid year between ${MIN_YEAR} and ${currentYear}.`);
+          return;
+        }
+      }
+
+      if (
+        name === "enddate" &&
+        value.length === 4 &&
+        currentEducation.startdate?.length === 4 &&
+        Number(value) < Number(currentEducation.startdate)
+      ) {
+        setAlertMessage("End year cannot be earlier than start year.");
+        setAlertOpen(true);
+        return;
+      }
+
+      if (
+        name === "startdate" &&
+        value.length === 4 &&
+        currentEducation.enddate?.length === 4 &&
+        Number(value) > Number(currentEducation.enddate)
+      ) {
+        setAlertMessage("Start year cannot be later than end year.");
+        setAlertOpen(true);
+        return;
+      }
+    }
+
+    currentEducation[name] = type === "checkbox" ? checked : value;
+
+    if (name === "startdate" && Number(value) === currentYear) {
+      currentEducation.ongoing = true;
+      currentEducation.enddate = "";
+    }
+
+    if (name === "ongoing" && checked) {
+      currentEducation.enddate = "";
+    }
+
+    clone[inputKey] = currentEducation;
+    setEducationDetails(clone);
+  };
+
+  const calculateProfileCompleteness = () => {
+    const firstEntry = educationDetails[0];
+
+    if (firstEntry) {
+      const allfieldsCompleted = Object.values(firstEntry).every(field => field !== "")
+      if (allfieldsCompleted) {
+        if (!completedSections.sections.includes("Education")) {
+          setCompletedSections(prevState => ({
+            ...prevState,
+            sections: [...prevState.sections, "Education"]
+          }));
+        }
+      } else {
+        if (completedSections.sections.includes("Education")) {
+          setCompletedSections(prevState => ({
+            ...prevState,
+            sections: prevState.sections.filter(section => section !== "Education")
+          }));
+        }
+      }
+    }
+
+  }
+
   return (
-    <Box sx={{ display: "flex", flexDirection: "column" }}>
+    <Box >
       <Typography
         sx={{
           width: "33%",
@@ -67,9 +171,9 @@ export default function Education() {
         Education
       </Typography>
 
-      <Box sx={{ flexGrow: 1 }}>
-        {stateValue.map((item, key) => (
-          <Grid key={key} container columns={16}>
+      <Box sx={{ display: 'flex', flexDirection: "column", gap: '10px', flexGrow: 1 }}>
+        {educationDetails.map((education, key) => (
+          <Grid key={key} container columns={16} sx={{ display: 'flex', alignItems: 'center' }}>
             <Grid item xs={14} sm={15} md={15}>
               <Accordion
                 expanded={expanded === key}
@@ -86,8 +190,8 @@ export default function Education() {
                   aria-controls="panel1bh-content"
                   id="panel1bh-header"
                 >
-                  <Typography sx={{ width: "33%", flexShrink: 0 }}>
-                    {item.institution ? item.institution : "(Not Specified)"}
+                  <Typography sx={{ width: "90%", flexShrink: 0 }}>
+                    {education.institution ? education.institution : "(Not Specified)"}
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
@@ -98,20 +202,14 @@ export default function Education() {
                   >
                     <Grid item xs={16} md={6}>
                       <TextField
+                        id="educationinstitution"
                         label="Institution"
                         name="institution"
-                        value={stateValue.institution}
+                        value={education.institution}
                         type="text"
-                        variant="filled"
                         sx={{
                           width: "100%",
-                          background: "#e7eaf4",
                           borderRadius: "5px",
-                        }}
-                        InputLabelProps={{
-                          sx: {
-                            color: "#828ba2",
-                          },
                         }}
                         InputProps={{
                           disableUnderline: true,
@@ -121,20 +219,14 @@ export default function Education() {
                     </Grid>
                     <Grid item xs={16} md={6}>
                       <TextField
+                        id="educationdegree"
                         label="Degree"
                         name="degree"
-                        value={stateValue.degree}
+                        value={education.degree}
                         type="text"
-                        variant="filled"
                         sx={{
                           width: "100%",
-                          background: "#e7eaf4",
                           borderRadius: "5px",
-                        }}
-                        InputLabelProps={{
-                          sx: {
-                            color: "#828ba2",
-                          },
                         }}
                         InputProps={{
                           disableUnderline: true,
@@ -142,68 +234,91 @@ export default function Education() {
                         onChange={(e) => handleInputChange(e, key)}
                       />
                     </Grid>
-                    <Grid item xs={12} md={6} sx={{ display: "flex" }}>
+                    <Grid item xs={12} md={6} sx={{ display: "flex", gap: '20px' }}>
                       <TextField
-                        variant="filled"
-                        label="Start Date"
+                        id="educationstartyear"
+                        label="Start Year"
                         name="startdate"
-                        value={stateValue.startdate}
-                        type="month"
-                        sx={{
-                          background: "#e7eaf4",
-                          borderRadius: "5px",
-                        }}
-                        InputProps={{
+                        value={education.startdate}
+                        type="text"
+                        inputProps={{
+                          inputMode: "numeric",
+                          maxLength: 4,
                           disableUnderline: true,
                         }}
-                        InputLabelProps={{
-                          sx: {
-                            fontSize: "12px",
-                            color: "#828ba2",
-                          },
-                        }}
-                        onChange={(e) => handleInputChange(e, key)}
-                      />
-
-                      <TextField
-                        variant="filled"
-                        label="End Date"
-                        name="enddate"
-                        value={stateValue.enddate}
-                        type="month"
                         sx={{
-                          marginLeft: "20px",
-                          background: "#e7eaf4",
                           borderRadius: "5px",
+                          width: '50%'
                         }}
-                        InputProps={{
-                          disableUnderline: true,
-                        }}
-                        InputLabelProps={{
-                          sx: {
-                            fontSize: "12px",
-                            color: "#828ba2",
-                          },
-                        }}
+                        error={
+                          education.startdate !== "" &&
+                          !isValidYear(education.startdate)
+                        }
+                        helperText={
+                          education.startdate !== "" &&
+                            !isValidYear(education.startdate)
+                            ? `Enter a valid year up to ${currentYear}`
+                            : ""
+                        }
                         onChange={(e) => handleInputChange(e, key)}
                       />
+                      <Box sx={{ width: "50%" }}>
+                        <TextField
+                          id="educationendyear"
+                          label="End Year"
+                          name="enddate"
+                          value={education.enddate}
+                          disabled={Boolean(education.ongoing)}
+                          type="text"
+                          inputProps={{
+                            inputMode: "numeric",
+                            maxLength: 4,
+                          }}
+                          error={
+                            education.enddate !== "" &&
+                            !isValidYear(education.enddate)
+                          }
+                          helperText={
+                            education.enddate !== "" &&
+                              !isValidYear(education.enddate)
+                              ? `Enter a valid year up to ${currentYear}`
+                              : ""
+                          }
+                          inputProps={{
+                            inputMode: "numeric",
+                            maxLength: 4,
+                            disableUnderline: true,
+                          }}
+                          sx={{
+                            width: '100%',
+                            borderRadius: "5px",
+                          }}
+                          onChange={(e) => handleInputChange(e, key)}
+                        />
+                        <FormControlLabel
+                          sx={{ mt: 0.5, ml: 0 }}
+                          control={
+                            <Checkbox
+                              name="ongoing"
+                              checked={Boolean(education.ongoing)}
+                              onChange={(e) => handleInputChange(e, key)}
+                              size="small"
+                            />
+                          }
+                          label="Ongoing"
+                        />
+                      </Box>
                     </Grid>
                     <Grid item xs={16} md={6}>
                       <TextField
+                        id="educationcity"
                         label="City"
                         name="institutioncity"
                         type="text"
-                        value={stateValue.city}
-                        variant="filled"
+                        value={education.institutioncity}
                         sx={{
                           width: "100%",
-                          background: "#e7eaf4",
                           borderRadius: "5px",
-                        }}
-                        InputLabelProps={{
-                          sx: {
-                            color: "#828ba2",
-                          },
                         }}
                         InputProps={{
                           disableUnderline: true,
@@ -211,63 +326,67 @@ export default function Education() {
                         onChange={(e) => handleInputChange(e, key)}
                       />
                     </Grid>
-                    <Grid item xs={16} md={12}>
-                      <TextField
-                        label="Description"
-                        type="text"
-                        value={stateValue.description}
-                        name="description"
-                        InputLabelProps={{
-                          sx: {
-                            color: "#828ba2",
-                          },
-                        }}
-                        multiline
-                        rows={8}
-                        sx={{ width: "100%", background: "#e7eaf4" }}
-                        onChange={(e) => handleInputChange(e, key)}
-                      />
-                    </Grid>
+
                   </Grid>
                 </AccordionDetails>
               </Accordion>
             </Grid>
             <Grid item md="auto">
-              <DeleteOutlineOutlinedIcon
+              {key > 0 && <DeleteOutlineOutlinedIcon
                 sx={{
-                  marginTop: "20px",
                   marginLeft: "5px",
-                  fontSize: "25px",
-                  color: "white",
-                  "&:hover": {
-                    color: "#2196f3",
-                    cursor: "pointer",
+                  fontSize: {
+                    xs: '20px',
+                    md: '25px'
                   },
+                  color: "red",
+                  cursor: "pointer"
                 }}
                 onClick={() => deleteAccordionSection(key)}
-              />
+              />}
             </Grid>
           </Grid>
         ))}
       </Box>
-      <Typography
-        sx={{
-          width: "94%",
-          fontWeight: "700",
-          marginTop: "10px",
-          padding: "5px",
-          display: "flex",
-          borderRadius: "5px",
-          "&:hover": {
-            backgroundColor: "#e3f2fd",
-            cursor: "pointer",
-          },
-        }}
-        color="primary"
-        onClick={addAccordionSection}
+      <Grid container columns={16} sx={{ display: 'flex', alignItems: 'center' }}>
+        <Grid item xs={14} sm={15} md={15}>
+          <Typography
+            sx={{
+              width: "100%",
+              fontWeight: "700",
+              marginTop: "10px",
+              padding: "5px",
+              display: "flex",
+              borderRadius: "5px",
+              "&:hover": {
+                backgroundColor: "#e3f2fd",
+                cursor: "pointer",
+              },
+            }}
+            color="primary"
+            onClick={addAccordionSection}
+          >
+            <AddIcon sx={{ fontSize: "20px" }} /> Add one more education
+          </Typography>
+        </Grid>
+      </Grid>
+      <Modal
+        open={alertOpen}
+        onClose={handleAlertClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
       >
-        <AddIcon sx={{ fontSize: "20px" }} /> Add one more education
-      </Typography>
+        <Box sx={modalStyles}>
+          <Typography id="modal-modal-title" variant="h7" component="h2">
+            {alertMessage}
+          </Typography>
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+            <Button onClick={handleAlertClose} variant="outlined" color="primary" sx={{ mr: 1 }}>
+              OK
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
     </Box>
   );
 }

@@ -1,26 +1,28 @@
-import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import GTranslateOutlinedIcon from "@mui/icons-material/GTranslateOutlined";
 import SportsEsportsOutlinedIcon from "@mui/icons-material/SportsEsportsOutlined";
-import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import NordicWalkingOutlinedIcon from "@mui/icons-material/NordicWalkingOutlined";
-import Courses from "./Courses";
+import AppsIcon from '@mui/icons-material/Apps';
+import Projects from "./Projects";
 import ExtraCurricular from "./ExtraCurricular";
 import Hobbies from "./Hobbies";
 import Language from "./Language";
+import References from "./References";
+import { Reference } from "../SvgComponents/SVG";
 
 export default function AddSection({
-  allSections,
-  setAllSections,
+  customSection,
+  setCustomSection,
   deleteCustomSection,
 }) {
 
-  const addSections = (newSectionId, newSectionName) => {
-    setAllSections([
-      ...allSections,
-      { id: newSectionId, name: newSectionName },
+
+  const addSections = (sectionId, newSectionName) => {
+    setCustomSection([
+      ...customSection,
+      { id: sectionId, name: newSectionName },
     ]);
   };
 
@@ -28,17 +30,17 @@ export default function AddSection({
     {
       id: 5,
       icon: (
-        <SchoolOutlinedIcon
+        <AppsIcon
           style={{
             fontSize: "35px",
-            ...{ color: allSections.map((item) => item.id).includes(5) ? "#bdbdbd" : "#1565c0" },
+            ...{ color: customSection.map((item) => item.id).includes(5) ? "#bdbdbd" : "#1565c0" },
           }}
           color="primary"
         />
       ),
-      name: "Courses",
+      name: "Projects",
       component: (
-        <Courses
+        <Projects
           deleteCustomSection={deleteCustomSection}
           sectionId={5}
         />
@@ -51,11 +53,11 @@ export default function AddSection({
           color="primary"
           sx={{
             fontSize: "35px",
-            ...{ color: allSections.map((item) => item.id).includes(6) ? "#bdbdbd" : "#1565c0" },
+            ...{ color: customSection.map((item) => item.id).includes(6) ? "#bdbdbd" : "#1565c0" },
           }}
         />
       ),
-      name: "Extra-curricular Activities",
+      name: "Extra-Curricular Activities",
       component: (
         <ExtraCurricular
           deleteCustomSection={deleteCustomSection}
@@ -70,7 +72,7 @@ export default function AddSection({
           color="primary"
           sx={{
             fontSize: "35px",
-            ...{ color: allSections.map((item) => item.id).includes(7) ? "#bdbdbd" : "#1565c0" },
+            ...{ color: customSection.map((item) => item.id).includes(7) ? "#bdbdbd" : "#1565c0" },
           }}
         />
       ),
@@ -89,7 +91,7 @@ export default function AddSection({
           color="primary"
           sx={{
             fontSize: "35px",
-            ...{ color: allSections.map((item) => item.id).includes(8) ? "#bdbdbd" : "#1565c0" },
+            ...{ color: customSection.map((item) => item.id).includes(8) ? "#bdbdbd" : "#1565c0" },
           }}
         />
       ),
@@ -101,8 +103,20 @@ export default function AddSection({
         />
       ),
     },
+    {
+      id: 9,
+      icon: (
+        <Reference customSection={customSection} />
+      ),
+      name: "References",
+      component: (
+        <References
+          deleteCustomSection={deleteCustomSection}
+          sectionId={9}
+        />
+      ),
+    },
   ];
-
 
   return (
     <Box>
@@ -122,17 +136,17 @@ export default function AddSection({
         rowSpacing={1}
         columns={16}
         columnSpacing={{ xs: 1, sm: 2, md: 3 }}
-        sx={{ marginLeft: "5px", padding: "-7px" }}
+        sx={{  }}
       >
         {addSectionElements.map((item) => (
           <Grid
             key={item.id}
             container
             item
-            xs={3}
-            lg={5}
+            xs={10}
+            sm={10}
             md={10}
-            sm={3}
+            lg={6}
             sx={{ width: "30%", padding: "10px" }}
           >
             <Grid>{item.icon}</Grid>
@@ -149,10 +163,10 @@ export default function AddSection({
                   cursor: "pointer",
                 },
                 ...{
-                  pointerEvents: allSections.map((section) => section.id).includes(item.id) ? "none" : "auto",
+                  pointerEvents: customSection.map((section) => section.id).includes(item.id) ? "none" : "auto",
                 },
                 ...{
-                  color: allSections.map((section) => section.id).includes(item.id) ? "#bdbdbd" : "primary",
+                  color: customSection.map((section) => section.id).includes(item.id) ? "#bdbdbd" : "primary",
                 },
               }}
               onClick={() => {

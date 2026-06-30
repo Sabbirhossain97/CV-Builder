@@ -7,7 +7,7 @@ import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Link from "next/link";
-import Footer from "./Footer";
+import Footer from "../Footer/Footer";
 
 export default function Home() {
   return (
@@ -60,29 +60,52 @@ export default function Home() {
         </Link>
       </Box>
       <Box
-        style={{
+        sx={{
           background: "#e6ecf7",
           display: "flex",
-          flexDirection: "row",
+          flexDirection: {
+            xs: 'column',
+            sm: 'column',
+            md: 'row'
+          },
           justifyContent: "center",
-          marginTop: "200px",
-          flexWrap: "wrap",
+          marginTop: "150px",
+          flexWrap: {
+            xs: 'wrap',
+            sm: 'wrap',
+            md: 'nowrap'
+          },
           position: "relative",
-          padding: "100px",
+          padding: "25px",
         }}
       >
-        <Image
-          src="/Images/sample.jpg"
-          alt="cv"
-          priority
-          width={750}
-          height={750}
-          layout="intrinsic"
-        />
         <Box
           style={{
+            width: {
+              xs: '100%',
+              sm: '100%',
+              md: '50%'
+            },
+            display: 'flex',
+          }}
+        >
+          <Image
+            src="/Images/sample.jpg"
+            alt="cv"
+            priority
+            width={750}
+            height={750}
+            layout="intrinsic"
+          />
+        </Box>
+        <Box
+          style={{
+            width: {
+              xs: '100%',
+              sm: '100%',
+              md: '50%'
+            },
             padding: "20px",
-            marginLeft: "50px",
             fontSize: "25px",
             fontFamily: "Segoe UI",
             display: "flex",
@@ -97,6 +120,7 @@ export default function Home() {
               flexDirection: "row",
               marginTop: "30px",
               width: "100%",
+              gap: '15px',
             }}
           >
             <HandymanIcon
@@ -104,9 +128,13 @@ export default function Home() {
             />
             <Typography
               style={{
-                marginLeft: "15px",
                 fontWeight: "600",
-                fontSize: "25px",
+                fontSize: {
+                  xs: '15px',
+                  sm: "18px",
+                  md: '20px',
+                  lg: '25px'
+                },
                 textAlign: "left",
               }}
             >
@@ -123,7 +151,12 @@ export default function Home() {
               style={{
                 marginLeft: "19px",
                 fontWeight: "600",
-                fontSize: "25px",
+                fontSize: {
+                  xs: '15px',
+                  sm: "18px",
+                  md: '20px',
+                  lg: '25px'
+                },
               }}
             >
               Live PDF Viewer
@@ -139,7 +172,12 @@ export default function Home() {
               style={{
                 marginLeft: "15px",
                 fontWeight: "600",
-                fontSize: "25px",
+                fontSize: {
+                  xs: '15px',
+                  sm: "18px",
+                  md: '20px',
+                  lg: '25px'
+                },
               }}
             >
               Free Download
@@ -147,7 +185,7 @@ export default function Home() {
           </Box>
         </Box>
       </Box>
-      <Footer/>
+      <Footer />
     </Box>
   );
 }

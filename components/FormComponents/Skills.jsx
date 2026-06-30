@@ -1,13 +1,10 @@
-import * as React from "react";
 import { useState, useContext } from "react";
-import { styled } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import AddIcon from "@mui/icons-material/Add";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
-import Switch from "@mui/material/Switch";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -17,32 +14,33 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import { AntSwitch } from "../helpers/helpers";
 import { DataContext } from "../../pages/CVBuilder";
 
 export default function Skills() {
   const getData = useContext(DataContext);
-  const [expanded, setExpanded] = React.useState(false);
+  const [expanded, setExpanded] = useState(false);
 
-  const handleChange = (panel) => (event, isExpanded) => {
+  const handleChange = (panel) => (_, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
   };
 
-  const [stateValue, setStateValue] = getData.value6;
+  const [skillDetails, setSkillDetails] = getData.skills;
+  const [showExpLevel, setShowExpLevel] = getData.skillExpLevel;
+  const [completedSections, setCompletedSections] = getData.completed
 
   const deleteAccordionSection = (id) => {
-    const result = stateValue.filter((item, key) => {
+    const result = skillDetails.filter((item, key) => {
       if (key !== id) {
         return item;
       }
     });
-    setStateValue(result);
+    setSkillDetails(result);
   };
 
-  const [toggleSwitch, setToggleSwitch] = useState(false);
-
   const addAccordionSection = () => {
-    setStateValue([
-      ...stateValue,
+    setSkillDetails([
+      ...skillDetails,
       {
         skill: "",
         level: "",
@@ -52,56 +50,39 @@ export default function Skills() {
 
   const handleInputChange = (e, inputKey) => {
     const { name, value } = e.target;
-    let clone = [...stateValue];
+    let clone = [...skillDetails];
     let obj = clone[inputKey];
     obj[name] = value;
     clone[inputKey] = obj;
-    setStateValue([...clone]);
+    setSkillDetails([...clone]);
+    calculateProfileCompleteness();
   };
-  const AntSwitch = styled(Switch)(({ theme }) => ({
-    width: 28,
-    height: 16,
-    padding: 0,
-    display: "flex",
-    "&:active": {
-      "& .MuiSwitch-thumb": {
-        width: 15,
-      },
-      "& .MuiSwitch-switchBase.Mui-checked": {
-        transform: "translateX(9px)",
-      },
-    },
-    "& .MuiSwitch-switchBase": {
-      padding: 2,
-      "&.Mui-checked": {
-        transform: "translateX(12px)",
-        color: "#fff",
-        "& + .MuiSwitch-track": {
-          opacity: 1,
-          backgroundColor:
-            theme.palette.mode === "dark" ? "#177ddc" : "#1890ff",
-        },
-      },
-    },
-    "& .MuiSwitch-thumb": {
-      boxShadow: "0 2px 4px 0 rgb(0 35 11 / 20%)",
-      width: 12,
-      height: 12,
-      borderRadius: 6,
-      transition: theme.transitions.create(["width"], {
-        duration: 200,
-      }),
-    },
-    "& .MuiSwitch-track": {
-      borderRadius: 16 / 2,
-      opacity: 1,
-      backgroundColor:
-        theme.palette.mode === "dark"
-          ? "rgba(255,255,255,.35)"
-          : "rgba(0,0,0,.25)",
-      boxSizing: "border-box",
-    },
-  }));
+
+
+  const calculateProfileCompleteness = () => {
+    const firstEntry = skillDetails[0];
+
+    if (firstEntry) {
+      const allfieldsCompleted = Object.values(firstEntry).every(field => field !== "")
+
+      if (allfieldsCompleted) {
+        if (!completedSections.sections.includes("Skills")) {
+          setCompletedSections(prevState => ({
+            ...prevState,
+            sections: [...prevState.sections, "Skills"]
+          }));
+        }
+      } else {
+        if (completedSections.sections.includes("Skills")) {
+          setCompletedSections(prevState => ({
+            ...prevState,
+            sections: prevState.sections.filter(section => section !== "Skills")
+          }));
+        }
+      }
+    }
+  }
+
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column" }}>
@@ -124,27 +105,26 @@ export default function Skills() {
         style={{ marginTop: "-10px" }}
       >
         <AntSwitch
-          defaultChecked={!toggleSwitch}
+          defaultChecked={!showExpLevel}
           inputProps={{ "aria-label": "ant design" }}
           onChange={() => {
-            setToggleSwitch(!toggleSwitch);
+            setShowExpLevel(!showExpLevel);
           }}
         />
         <Typography sx={{ fontSize: "15px" }}>
-          Don&apos;t show experience level
+          show experience level
         </Typography>
       </Stack>
 
-      <Box sx={{ marginTop: "15px" }}>
-        {stateValue.map((item, key) => (
-          <Grid key={key} container columns={16}>
+      <Box sx={{ display: 'flex', flexDirection: "column", gap: '10px', marginTop: "15px", flexGrow: 1 }}>
+        {skillDetails.map((skills, key) => (
+          <Grid key={key} container columns={16} sx={{ display: 'flex', alignItems: 'center' }}>
             <Grid item xs={14} sm={15} md={15}>
               <Accordion
                 expanded={expanded === key}
                 onChange={handleChange(key)}
                 sx={{
                   backgroundColor: "white",
-                  marginTop: "10px",
                   boxShadow: "none",
                   border: "1px solid",
                   borderColor: "#e7eaf4",
@@ -155,8 +135,8 @@ export default function Skills() {
                   aria-controls="panel1bh-content"
                   id="panel1bh-header"
                 >
-                  <Typography sx={{ width: "33%", flexShrink: 0 }}>
-                    {item.skill ? item.skill : "(Not Specified)"}
+                  <Typography sx={{ width: "100%", flexShrink: 0 }}>
+                    {skills.skill ? skills.skill : "(Not Specified)"}
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
@@ -167,78 +147,57 @@ export default function Skills() {
                   >
                     <Grid item xs={15} sm={6} md={6}>
                       <TextField
-                        id="outlined-basic"
+                        id="skilltitle"
                         label="Skill"
-                        variant="filled"
-                        value={stateValue.skill}
+                        type="text"
+                        value={skills.skill}
                         name="skill"
                         sx={{
                           width: "100%",
-                          background: "#e7eaf4",
                           borderRadius: "5px",
-                        }}
-                        InputLabelProps={{
-                          sx: {
-                            color: "#828ba2",
-                          },
-                        }}
-                        InputProps={{
-                          disableUnderline: true,
                         }}
                         onChange={(e) => handleInputChange(e, key)}
                       />
                     </Grid>
                     <Grid item xs={15} sm={6} md={6}>
-                      <FormControl sx={{ width: "100%"}}>
+                      <FormControl sx={{ width: "100%" }}>
                         <InputLabel
                           id="demo-simple-select-helper-label"
-                          sx={{}}
                         >
                           Level
                         </InputLabel>
                         <Select
-                          labelId="demo-simple-select-helper-label"
-                          id="demo-simple-select-helper"
+                          id="skilllevel"
                           label="level"
-                          disabled={toggleSwitch ? false : true}
-                          defaultValue=""
-                          value={stateValue.level}
-                          variant="filled"
+                          disabled={showExpLevel ? true : false}
+                          value={skills.level}
                           name="level"
-                          sx={{ background: "#e7eaf4", borderRadius: "5px" }}
-                          InputProps={{
-                            disableUnderline: true,
-                          }}
                           onChange={(e) => handleInputChange(e, key)}
                         >
                           {[
                             {
-                              value: 0,
-                              name: "None",
-                            },
-                            {
                               value: 1,
-                              name: "Novice",
+                              name: "⭐",
                             },
                             {
                               value: 2,
-                              name: "Beginner",
+                              name: "⭐⭐",
                             },
                             {
                               value: 3,
-                              name: "Skillfull",
+                              name: "⭐⭐⭐",
                             },
                             {
                               value: 4,
-                              name: "Experienced",
+                              name: "⭐⭐⭐⭐",
                             },
                             {
                               value: 5,
-                              name: "Expert",
+                              name: "⭐⭐⭐⭐⭐",
                             },
                           ].map((item, key) => (
                             <MenuItem
-                              defaultValue={stateValue.level}
+                              defaultValue={skillDetails.level}
                               value={item.name}
                               key={key}
                             >
@@ -253,42 +212,44 @@ export default function Skills() {
               </Accordion>
             </Grid>
             <Grid item md="auto">
-              <DeleteOutlineOutlinedIcon
+              {key > 0 && <DeleteOutlineOutlinedIcon
                 sx={{
-                  marginTop: "20px",
                   marginLeft: "5px",
-                  fontSize: "25px",
-                  color: "white",
-                  "&:hover": {
-                    color: "#2196f3",
-                    cursor: "pointer",
+                  fontSize: {
+                    xs: '20px',
+                    md: '25px'
                   },
+                  color: "red",
+                  cursor: "pointer"
                 }}
                 onClick={() => deleteAccordionSection(key)}
-              />
+              />}
             </Grid>
           </Grid>
         ))}
       </Box>
-      {/* add one more skill area */}
-      <Typography
-        sx={{
-          width: "94%",
-          fontWeight: "700",
-          marginTop: "10px",
-          padding: "5px",
-          display: "flex",
-          borderRadius: "5px",
-          "&:hover": {
-            backgroundColor: "#e3f2fd",
-            cursor: "pointer",
-          },
-        }}
-        color="primary"
-        onClick={addAccordionSection}
-      >
-        <AddIcon sx={{ fontSize: "20px" }} /> Add one more skill
-      </Typography>
+      <Grid container columns={16} sx={{ display: 'flex', alignItems: 'center' }}>
+        <Grid item xs={14} sm={15} md={15}>
+          <Typography
+            sx={{
+              width: "100%",
+              fontWeight: "700",
+              marginTop: "10px",
+              padding: "5px",
+              display: "flex",
+              borderRadius: "5px",
+              "&:hover": {
+                backgroundColor: "#e3f2fd",
+                cursor: "pointer",
+              },
+            }}
+            color="primary"
+            onClick={addAccordionSection}
+          >
+            <AddIcon sx={{ fontSize: "20px" }} /> Add one more skill
+          </Typography>
+        </Grid>
+      </Grid>
     </Box>
   );
 }

@@ -1,7 +1,10 @@
+
 import * as React from "react";
 import { useState, useContext } from "react";
 import Typography from "@mui/material/Typography";
+import { Button, Checkbox, FormControlLabel } from "@mui/material";
 import Box from "@mui/material/Box";
+import Alert from "@mui/material/Alert";
 import AddIcon from "@mui/icons-material/Add";
 import Grid from "@mui/material/Grid";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
@@ -11,33 +14,71 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import TextField from "@mui/material/TextField";
 import { DataContext } from "../../pages/CVBuilder";
+import 'react-quill/dist/quill.snow.css';
+import dynamic from 'next/dynamic';
+import Modal from '@mui/material/Modal';
+import { modalStyles } from "../helpers/helpers";
+
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
 export default function Employment() {
+
   const getData = useContext(DataContext);
   const [expanded, setExpanded] = useState(false);
-  const handleChange = (panel) => (event, isExpanded) => {
+  const handleChange = (panel) => (_, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
   };
 
-  const [stateValue, setStateValue] = getData.value3;
+  const [employmentDetails, setEmploymentDetails] = getData.employment;
+  const [completedSections, setCompletedSections] = getData.completed
+  const [disabledEditor, setDisabledEditor] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
+
+  const showAlert = (message) => {
+    setAlertOpen(true);
+  };
+
+  const handleAlertClose = (_, reason) => {
+    if (reason === "clickaway") return;
+
+    setAlertOpen(false);
+  };
+
+  const handleOk = () => {
+    setOpenModal(false)
+    setDisabledEditor(false)
+  }
+  const handleClose = () => {
+    setOpenModal(false)
+    setDisabledEditor(false)
+  }
 
   const deleteAccordionSection = (id) => {
-    const result = stateValue.filter((item, key) => {
+    const result = employmentDetails.filter((item, key) => {
       if (key !== id) {
         return item;
       }
     });
-    setStateValue(result);
+    setEmploymentDetails(result);
+  };
+
+  const modules = {
+    toolbar: [
+      [{ 'list': 'bullet' }],
+      ['clean']
+    ],
   };
 
   const addAccordionSection = () => {
-    setStateValue([
-      ...stateValue,
+    setEmploymentDetails([
+      ...employmentDetails,
       {
         jobtitle: "",
         employer: "",
         startdate: "",
         enddate: "",
+        ongoing: false,
         city: "",
         description: "",
       },
@@ -45,38 +86,124 @@ export default function Employment() {
   };
 
   const handleInputChange = (e, inputKey) => {
-    const { name, value } = e.target;
-    let clone = [...stateValue];
-    let obj = clone[inputKey];
-    obj[name] = value;
-    clone[inputKey] = obj;
-    setStateValue([...clone]);
+    const { name, value, checked, type } = e.target;
+
+    const clone = [...employmentDetails];
+    const currentEmployment = { ...clone[inputKey] };
+
+    if (name === "enddate" && currentEmployment.startdate) {
+      if (value < currentEmployment.startdate) {
+        showAlert("End date cannot be earlier than start date.");
+        return;
+      }
+    }
+
+    if (name === "startdate" && currentEmployment.enddate) {
+      if (value > currentEmployment.enddate) {
+        showAlert("Start date cannot be later than end date.");
+        return;
+      }
+    }
+
+    currentEmployment[name] = type === "checkbox" ? checked : value;
+
+    if (name === "ongoing" && checked) {
+      currentEmployment.enddate = "";
+    }
+
+    clone[inputKey] = currentEmployment;
+    setEmploymentDetails(clone);
+
+    calculateProfileCompleteness();
   };
 
+  const handleDescriptionChange = (index, value) => {
+
+    if ((value.startsWith("<p>") && value.endsWith("</p>") && value !== "<p><br></p>")) {
+      setOpenModal(true)
+      setDisabledEditor(true)
+    }
+    else {
+      setDisabledEditor(false)
+      const updatedEmploymentDetails = [...employmentDetails];
+      updatedEmploymentDetails[index].description = value;
+      setEmploymentDetails(updatedEmploymentDetails);
+      calculateProfileCompleteness();
+    }
+  };
+
+  const calculateProfileCompleteness = () => {
+    const firstEntry = employmentDetails[0];
+    if (firstEntry) {
+
+      const allfieldsCompleted = Object.values(firstEntry).every(field => field !== "")
+
+      if (allfieldsCompleted) {
+        if (!completedSections.sections.includes("Experience")) {
+          setCompletedSections(prevState => ({
+            ...prevState,
+            sections: [...prevState.sections, "Experience"]
+          }));
+        }
+      } else {
+        if (completedSections.sections.includes("Experience")) {
+          setCompletedSections(prevState => ({
+            ...prevState,
+            sections: prevState.sections.filter(section => section !== "Experience")
+          }));
+        }
+      }
+    }
+  }
+
   return (
-    <Box sx={{ display: "flex", flexDirection: "column" }}>
+    <Box >
       <Typography
         sx={{
-          width: "33%",
+          width: "100%",
           marginTop: "50px",
           paddingBottom: "20px",
           fontWeight: "700",
           fontSize: "20px",
+
         }}
       >
         Experience
       </Typography>
 
-      <Box sx={{ flexGrow: 1 }}>
-        {stateValue.map((item, key) => (
-          <Grid key={key} container columns={16}>
+      <Modal
+        open={openModal}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={modalStyles}>
+          <Typography id="modal-modal-title" variant="h6" component="h2" style={{ color: '#ffc107' }}>
+            Warning!
+          </Typography>
+          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+            Bullet points only
+          </Typography>
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+            <Button onClick={handleClose} variant="outlined" color="primary" sx={{ mr: 1 }}>
+              Cancel
+            </Button>
+            <Button onClick={handleOk} variant="contained" color="primary">
+              OK
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+
+      <Box sx={{ display: 'flex', flexDirection: "column", gap: '10px', flexGrow: 1 }}>
+        {employmentDetails.map((employment, key) => (
+          <Grid key={key} container columns={16} sx={{ display: 'flex', alignItems: 'center' }}>
             <Grid item xs={14} sm={15} md={15}>
               <Accordion
                 expanded={expanded === key}
                 onChange={handleChange(key)}
                 sx={{
                   backgroundColor: "white",
-                  cursor: "none",
                   boxShadow: "none",
                   border: "1px solid",
                   borderColor: "#e7eaf4",
@@ -87,8 +214,8 @@ export default function Employment() {
                   aria-controls="panel1bh-content"
                   id="panel1bh-header"
                 >
-                  <Typography sx={{ width: "90%", flexShrink: 0 }}>
-                    {item.jobtitle ? item.jobtitle : "(Not Specified)"}
+                  <Typography sx={{ width: "100%", flexShrink: 0 }}>
+                    {employment.jobtitle ? employment.jobtitle : "(Not Specified)"}
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
@@ -97,23 +224,16 @@ export default function Employment() {
                     rowSpacing={3}
                     columnSpacing={{ xs: 1, sm: 2, md: 3 }}
                   >
-                    <Grid item xs={16} sm={6} md={6}>
+                    <Grid item xs={16} sm={16} md={6}>
                       <TextField
-                        id={item.id}
+                        id="jobtitle"
                         label="Job title"
                         type="text"
-                        value={stateValue.jobtitle}
+                        value={employment.jobtitle}
                         name="jobtitle"
-                        variant="filled"
                         sx={{
                           width: "100%",
-                          background: "#e7eaf4",
                           borderRadius: "5px",
-                        }}
-                        InputLabelProps={{
-                          sx: {
-                            color: "#828ba2",
-                          },
                         }}
                         InputProps={{
                           disableUnderline: true,
@@ -121,23 +241,16 @@ export default function Employment() {
                         onChange={(e) => handleInputChange(e, key)}
                       />
                     </Grid>
-                    <Grid item xs={16} md={6}>
+                    <Grid item xs={16} sm={16} md={6}>
                       <TextField
-                        id={item.id}
+                        id="employer"
                         label="Employer"
                         type="text"
-                        value={stateValue.employer}
+                        value={employment.employer}
                         name="employer"
-                        variant="filled"
                         sx={{
                           width: "100%",
-                          background: "#e7eaf4",
                           borderRadius: "5px",
-                        }}
-                        InputLabelProps={{
-                          sx: {
-                            color: "#828ba2",
-                          },
                         }}
                         InputProps={{
                           disableUnderline: true,
@@ -145,71 +258,67 @@ export default function Employment() {
                         onChange={(e) => handleInputChange(e, key)}
                       />
                     </Grid>
-                    <Grid item xs={12} md={6} sx={{ display: "flex" }}>
+                    <Grid item xs={12} md={6} sx={{ display: "flex", gap: "20px" }}>
                       <TextField
-                        id={item.id}
-                        variant="filled"
+                        id="jobstartdate"
                         label="Start Date"
                         name="startdate"
-                        value={stateValue.startdate}
+                        value={employment.startdate}
                         type="month"
                         sx={{
-                          background: "#e7eaf4",
                           borderRadius: "5px",
+                          width: "50%",
                         }}
                         InputProps={{
                           disableUnderline: true,
                         }}
-                        InputLabelProps={{
-                          sx: {
-                            fontSize: "12px",
-                            color: "#828ba2",
-                          },
-                        }}
+                        InputLabelProps={{ shrink: true }}
                         onChange={(e) => handleInputChange(e, key)}
                       />
 
-                      <TextField
-                        id={item.id}
-                        variant="filled"
-                        label="End Date"
-                        name="enddate"
-                        value={stateValue.enddate}
-                        type="month"
-                        sx={{
-                          marginLeft: "20px",
-                          background: "#e7eaf4",
-                          borderRadius: "5px",
-                        }}
-                        InputProps={{
-                          disableUnderline: true,
-                        }}
-                        InputLabelProps={{
-                          sx: {
-                            fontSize: "12px",
-                            color: "#828ba2",
-                          },
-                        }}
-                        onChange={(e) => handleInputChange(e, key)}
-                      />
+                      <Box sx={{ width: "50%" }}>
+                        <TextField
+                          id="jobenddate"
+                          label="End Date"
+                          name="enddate"
+                          value={employment.enddate}
+                          type="month"
+                          disabled={Boolean(employment.ongoing)}
+                          sx={{
+                            borderRadius: "5px",
+                            width: "100%",
+                          }}
+                          InputProps={{
+                            disableUnderline: true,
+                          }}
+                          InputLabelProps={{ shrink: true }}
+                          onChange={(e) => handleInputChange(e, key)}
+                        />
+
+                        <FormControlLabel
+                          sx={{ mt: 0.5, ml: 0 }}
+                          control={
+                            <Checkbox
+                              name="ongoing"
+                              checked={Boolean(employment.ongoing)}
+                              onChange={(e) => handleInputChange(e, key)}
+                              size="small"
+                            />
+                          }
+                          label="Ongoing"
+                        />
+                      </Box>
                     </Grid>
                     <Grid item xs={16} md={6}>
                       <TextField
-                        id={item.id}
+                        id="jobcity"
                         label="City"
                         type="text"
-                        value={stateValue.city}
+                        value={employment.city}
                         name="city"
-                        variant="filled"
                         sx={{
                           width: "100%",
-                          background: "#e7eaf4",
                           borderRadius: "5px",
-                        }}
-                        InputLabelProps={{
-                          sx: {
-                            color: "#828ba2",
-                          },
                         }}
                         InputProps={{
                           disableUnderline: true,
@@ -218,22 +327,14 @@ export default function Employment() {
                       />
                     </Grid>
                     <Grid item xs={16} md={12}>
-                      <TextField
-                        id={item.id}
-                        label="Description"
-                        
-                        type="text"
-                        value={stateValue.description}
-                        name="description"
-                        InputLabelProps={{
-                          sx: {
-                            color: "#828ba2",
-                          },
-                        }}
-                        multiline
-                        rows={8}
-                        sx={{ width: "100%", background: "#e7eaf4" }}
-                        onChange={(e) => handleInputChange(e, key)}
+                      <Typography>Description</Typography>
+                      <ReactQuill
+                        style={{ marginTop: '10px', background: "#fff" }}
+                        value={employment.description}
+                        modules={modules}
+                        formats={['list']}
+                        readOnly={disabledEditor}
+                        onChange={(value) => handleDescriptionChange(key, value)}
                       />
                     </Grid>
                   </Grid>
@@ -241,41 +342,61 @@ export default function Employment() {
               </Accordion>
             </Grid>
             <Grid item md="auto">
-              <DeleteOutlineOutlinedIcon
+              {key > 0 && <DeleteOutlineOutlinedIcon
                 sx={{
-                  marginTop: "20px",
                   marginLeft: "5px",
-                  fontSize: "25px",
-                  color: "white",
-                  "&:hover": {
-                    color: "#2196f3",
-                    cursor: "pointer",
+                  fontSize: {
+                    xs: '20px',
+                    md: '25px'
                   },
+                  color: "red",
+                  cursor: "pointer"
                 }}
                 onClick={() => deleteAccordionSection(key)}
-              />
+              />}
             </Grid>
           </Grid>
         ))}
       </Box>
-      <Typography
-        sx={{
-          width: "94%",
-          fontWeight: "700",
-          marginTop: "10px",
-          display: "flex",
-          padding: "5px",
-          borderRadius: "5px",
-          "&:hover": {
-            backgroundColor: "#e3f2fd",
-            cursor: "pointer",
-          },
-        }}
-        color="primary"
-        onClick={addAccordionSection}
+      <Grid container columns={16} sx={{ display: 'flex', alignItems: 'center' }}>
+        <Grid item xs={14} sm={15} md={15}>
+          <Typography
+            sx={{
+              width: "100%",
+              fontWeight: "700",
+              marginTop: "10px",
+              display: "flex",
+              padding: "5px",
+              borderRadius: "5px",
+              "&:hover": {
+                backgroundColor: "#e3f2fd",
+                cursor: "pointer",
+              },
+            }}
+            color="primary"
+            onClick={addAccordionSection}
+          >
+            <AddIcon sx={{ fontSize: "20px" }} /> Add one more employment
+          </Typography>
+        </Grid>
+      </Grid>
+      <Modal
+        open={alertOpen}
+        onClose={handleAlertClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
       >
-        <AddIcon sx={{ fontSize: "20px" }} /> Add one more employment
-      </Typography>
+        <Box sx={modalStyles}>
+          <Typography id="modal-modal-title" variant="h7" component="h2">
+            Start date cannot be later than end date.
+          </Typography>
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+            <Button onClick={handleAlertClose} variant="outlined" color="primary" sx={{ mr: 1 }}>
+              OK
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
     </Box>
   );
 }
