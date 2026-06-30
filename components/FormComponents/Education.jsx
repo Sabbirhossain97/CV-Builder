@@ -17,7 +17,6 @@ import { modalStyles } from "../helpers/helpers";
 
 export default function Education() {
   const getData = useContext(DataContext);
-
   const [expanded, setExpanded] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("")
