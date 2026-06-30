@@ -270,10 +270,6 @@ export default function Education() {
                           value={education.enddate}
                           disabled={Boolean(education.ongoing)}
                           type="text"
-                          inputProps={{
-                            inputMode: "numeric",
-                            maxLength: 4,
-                          }}
                           error={
                             education.enddate !== "" &&
                             !isValidYear(education.enddate)
