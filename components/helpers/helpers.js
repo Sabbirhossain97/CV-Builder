@@ -99,16 +99,18 @@ export const colorPicker = [
     },
 ]
 
-export const dateConverter = (startDate, endDate) => {
+export const dateConverter = (startDate, endDate, status) => {
     const convertedStartDate = `${months[Number(startDate.split("-")[1]) - 1]} ${startDate.split("-")[0]}`;
     let convertedEndDate = endDate;
     const currentDate = new Date();
     const year = currentDate.getFullYear();
     const month = String(currentDate.getMonth() + 1).padStart(2, '0');
     const convertedCurrentDate = `${year}-${month}`;
-    if (convertedCurrentDate === convertedEndDate) {
+    if(status){
         convertedEndDate = "Present"
-    } else {
+    } else if(convertedCurrentDate === convertedEndDate) {
+        convertedEndDate = "Present"
+    } else if (convertedEndDate !== "") {
         convertedEndDate = `${months[Number(endDate.split("-")[1]) - 1]} ${endDate.split("-")[0]}`
     }
 

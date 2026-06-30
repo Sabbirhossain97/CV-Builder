@@ -8,11 +8,37 @@
 }
 
 @media print {
+
+    html,
+    body {
+        height: auto !important;
+        overflow: visible !important;
+        background: white !important;
+    }
+
     #template-wrapper {
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
         box-shadow: none !important;
     }
-}
 
+    .template-preview {
+        transform: none !important;
+        width: 100% !important;
+    }
+
+    #template-wrapper,
+    #template-wrapper * {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+
+    @page {
+        size: A4;
+        margin: 10mm;
+    }
+}
 @tailwind components;
 @tailwind utilities;
 

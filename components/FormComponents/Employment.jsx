@@ -2,8 +2,9 @@
 import * as React from "react";
 import { useState, useContext } from "react";
 import Typography from "@mui/material/Typography";
-import { Button } from "@mui/material";
+import { Button, Checkbox, FormControlLabel } from "@mui/material";
 import Box from "@mui/material/Box";
+import Alert from "@mui/material/Alert";
 import AddIcon from "@mui/icons-material/Add";
 import Grid from "@mui/material/Grid";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
@@ -32,6 +33,17 @@ export default function Employment() {
   const [completedSections, setCompletedSections] = getData.completed
   const [disabledEditor, setDisabledEditor] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
+
+  const showAlert = (message) => {
+    setAlertOpen(true);
+  };
+
+  const handleAlertClose = (_, reason) => {
+    if (reason === "clickaway") return;
+
+    setAlertOpen(false);
+  };
 
   const handleOk = () => {
     setOpenModal(false)
@@ -66,6 +78,7 @@ export default function Employment() {
         employer: "",
         startdate: "",
         enddate: "",
+        ongoing: false,
         city: "",
         description: "",
       },
@@ -73,12 +86,34 @@ export default function Employment() {
   };
 
   const handleInputChange = (e, inputKey) => {
-    const { name, value } = e.target;
-    let clone = [...employmentDetails];
-    let obj = clone[inputKey];
-    obj[name] = value;
-    clone[inputKey] = obj;
-    setEmploymentDetails([...clone]);
+    const { name, value, checked, type } = e.target;
+
+    const clone = [...employmentDetails];
+    const currentEmployment = { ...clone[inputKey] };
+
+    if (name === "enddate" && currentEmployment.startdate) {
+      if (value < currentEmployment.startdate) {
+        showAlert("End date cannot be earlier than start date.");
+        return;
+      }
+    }
+
+    if (name === "startdate" && currentEmployment.enddate) {
+      if (value > currentEmployment.enddate) {
+        showAlert("Start date cannot be later than end date.");
+        return;
+      }
+    }
+
+    currentEmployment[name] = type === "checkbox" ? checked : value;
+
+    if (name === "ongoing" && checked) {
+      currentEmployment.enddate = "";
+    }
+
+    clone[inputKey] = currentEmployment;
+    setEmploymentDetails(clone);
+
     calculateProfileCompleteness();
   };
 
@@ -223,7 +258,7 @@ export default function Employment() {
                         onChange={(e) => handleInputChange(e, key)}
                       />
                     </Grid>
-                    <Grid item xs={12} md={6} sx={{ display: "flex", gap: '20px' }}>
+                    <Grid item xs={12} md={6} sx={{ display: "flex", gap: "20px" }}>
                       <TextField
                         id="jobstartdate"
                         label="Start Date"
@@ -232,7 +267,7 @@ export default function Employment() {
                         type="month"
                         sx={{
                           borderRadius: "5px",
-                          width: '50%'
+                          width: "50%",
                         }}
                         InputProps={{
                           disableUnderline: true,
@@ -241,23 +276,38 @@ export default function Employment() {
                         onChange={(e) => handleInputChange(e, key)}
                       />
 
-                      <TextField
-                        id="jobenddate"
-                        label="End Date"
-                        name="enddate"
-                        value={employment.enddate}
-                        type="month"
-                        sx={{
-                          borderRadius: "5px",
-                          width: '50%'
+                      <Box sx={{ width: "50%" }}>
+                        <TextField
+                          id="jobenddate"
+                          label="End Date"
+                          name="enddate"
+                          value={employment.enddate}
+                          type="month"
+                          disabled={Boolean(employment.ongoing)}
+                          sx={{
+                            borderRadius: "5px",
+                            width: "100%",
+                          }}
+                          InputProps={{
+                            disableUnderline: true,
+                          }}
+                          InputLabelProps={{ shrink: true }}
+                          onChange={(e) => handleInputChange(e, key)}
+                        />
 
-                        }}
-                        InputProps={{
-                          disableUnderline: true,
-                        }}
-                        InputLabelProps={{ shrink: true }}
-                        onChange={(e) => handleInputChange(e, key)}
-                      />
+                        <FormControlLabel
+                          sx={{ mt: 0.5, ml: 0 }}
+                          control={
+                            <Checkbox
+                              name="ongoing"
+                              checked={Boolean(employment.ongoing)}
+                              onChange={(e) => handleInputChange(e, key)}
+                              size="small"
+                            />
+                          }
+                          label="Ongoing"
+                        />
+                      </Box>
                     </Grid>
                     <Grid item xs={16} md={6}>
                       <TextField
@@ -330,6 +380,23 @@ export default function Employment() {
           </Typography>
         </Grid>
       </Grid>
+      <Modal
+        open={alertOpen}
+        onClose={handleAlertClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={modalStyles}>
+          <Typography id="modal-modal-title" variant="h7" component="h2">
+            Start date cannot be later than end date.
+          </Typography>
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+            <Button onClick={handleAlertClose} variant="outlined" color="primary" sx={{ mr: 1 }}>
+              OK
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
     </Box>
   );
 }

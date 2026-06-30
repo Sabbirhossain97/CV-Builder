@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useState, useContext } from "react";
+import { Button, Checkbox, FormControlLabel } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
@@ -11,17 +12,31 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import { DataContext } from "../../pages/CVBuilder";
+import Modal from '@mui/material/Modal';
+import { modalStyles } from "../helpers/helpers";
 
 export default function Education() {
   const getData = useContext(DataContext);
 
   const [expanded, setExpanded] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("")
   const handleChange = (panel) => (_, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
   };
 
   const [educationDetails, setEducationDetails] = getData.education;
-  const [completedSections, setCompletedSections] = getData.completed
+  const [completedSections, setCompletedSections] = getData.completed;
+
+  const showAlert = (message) => {
+    setAlertOpen(true);
+  };
+
+  const handleAlertClose = (_, reason) => {
+    if (reason === "clickaway") return;
+
+    setAlertOpen(false);
+  };
 
   const deleteAccordionSection = (id) => {
     const result = educationDetails.filter((item, key) => {
@@ -40,19 +55,83 @@ export default function Education() {
         degree: "",
         startdate: "",
         enddate: "",
+        ongoing: false,
         institutioncity: "",
       },
     ]);
   };
-  const handleInputChange = (e, inputKey) => {
-    const { name, value } = e.target;
-    let clone = [...educationDetails];
-    let obj = clone[inputKey];
-    obj[name] = value;
-    clone[inputKey] = obj;
-    setEducationDetails([...clone]);
-    calculateProfileCompleteness();
 
+  const MIN_YEAR = 1900;
+  const currentYear = new Date().getFullYear();
+
+  const isValidYear = (year) => {
+    if (!year) return true; 
+
+    return (
+      /^\d{4}$/.test(year) &&
+      Number(year) >= MIN_YEAR &&
+      Number(year) <= currentYear
+    );
+  };
+
+  const handleInputChange = (e, inputKey) => {
+    const { name, value, checked, type } = e.target;
+
+    const clone = [...educationDetails];
+    const currentEducation = { ...clone[inputKey] };
+
+    const isYearField = name === "startdate" || name === "enddate";
+
+    if (isYearField) {
+      if (!/^\d{0,4}$/.test(value)) {
+        return;
+      }
+
+      if (value.length === 4) {
+        const numericYear = Number(value);
+
+        if (numericYear < MIN_YEAR || numericYear > currentYear) {
+          showAlert(`Please enter a valid year between ${MIN_YEAR} and ${currentYear}.`);
+          return;
+        }
+      }
+
+      if (
+        name === "enddate" &&
+        value.length === 4 &&
+        currentEducation.startdate?.length === 4 &&
+        Number(value) < Number(currentEducation.startdate)
+      ) {
+        setAlertMessage("End year cannot be earlier than start year.");
+        setAlertOpen(true);
+        return;
+      }
+
+      if (
+        name === "startdate" &&
+        value.length === 4 &&
+        currentEducation.enddate?.length === 4 &&
+        Number(value) > Number(currentEducation.enddate)
+      ) {
+        setAlertMessage("Start year cannot be later than end year.");
+        setAlertOpen(true);
+        return;
+      }
+    }
+
+    currentEducation[name] = type === "checkbox" ? checked : value;
+
+    if (name === "startdate" && Number(value) === currentYear) {
+      currentEducation.ongoing = true;
+      currentEducation.enddate = "";
+    }
+
+    if (name === "ongoing" && checked) {
+      currentEducation.enddate = "";
+    }
+
+    clone[inputKey] = currentEducation;
+    setEducationDetails(clone);
   };
 
   const calculateProfileCompleteness = () => {
@@ -162,32 +241,74 @@ export default function Education() {
                         label="Start Year"
                         name="startdate"
                         value={education.startdate}
-                        type="year"
+                        type="text"
+                        inputProps={{
+                          inputMode: "numeric",
+                          maxLength: 4,
+                          disableUnderline: true,
+                        }}
                         sx={{
                           borderRadius: "5px",
                           width: '50%'
                         }}
-                        InputProps={{
-                          disableUnderline: true,
-                        }}
+                        error={
+                          education.startdate !== "" &&
+                          !isValidYear(education.startdate)
+                        }
+                        helperText={
+                          education.startdate !== "" &&
+                            !isValidYear(education.startdate)
+                            ? `Enter a valid year up to ${currentYear}`
+                            : ""
+                        }
                         onChange={(e) => handleInputChange(e, key)}
                       />
-
-                      <TextField
-                        id="educationendyear"
-                        label="End Year"
-                        name="enddate"
-                        value={education.enddate}
-                        type="year"
-                        sx={{
-                          width: '50%',
-                          borderRadius: "5px",
-                        }}
-                        InputProps={{
-                          disableUnderline: true,
-                        }}
-                        onChange={(e) => handleInputChange(e, key)}
-                      />
+                      <Box sx={{ width: "50%" }}>
+                        <TextField
+                          id="educationendyear"
+                          label="End Year"
+                          name="enddate"
+                          value={education.enddate}
+                          disabled={Boolean(education.ongoing)}
+                          type="text"
+                          inputProps={{
+                            inputMode: "numeric",
+                            maxLength: 4,
+                          }}
+                          error={
+                            education.enddate !== "" &&
+                            !isValidYear(education.enddate)
+                          }
+                          helperText={
+                            education.enddate !== "" &&
+                              !isValidYear(education.enddate)
+                              ? `Enter a valid year up to ${currentYear}`
+                              : ""
+                          }
+                          inputProps={{
+                            inputMode: "numeric",
+                            maxLength: 4,
+                            disableUnderline: true,
+                          }}
+                          sx={{
+                            width: '100%',
+                            borderRadius: "5px",
+                          }}
+                          onChange={(e) => handleInputChange(e, key)}
+                        />
+                        <FormControlLabel
+                          sx={{ mt: 0.5, ml: 0 }}
+                          control={
+                            <Checkbox
+                              name="ongoing"
+                              checked={Boolean(education.ongoing)}
+                              onChange={(e) => handleInputChange(e, key)}
+                              size="small"
+                            />
+                          }
+                          label="Ongoing"
+                        />
+                      </Box>
                     </Grid>
                     <Grid item xs={16} md={6}>
                       <TextField
@@ -250,6 +371,23 @@ export default function Education() {
           </Typography>
         </Grid>
       </Grid>
+      <Modal
+        open={alertOpen}
+        onClose={handleAlertClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={modalStyles}>
+          <Typography id="modal-modal-title" variant="h7" component="h2">
+            {alertMessage}
+          </Typography>
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+            <Button onClick={handleAlertClose} variant="outlined" color="primary" sx={{ mr: 1 }}>
+              OK
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
     </Box>
   );
 }

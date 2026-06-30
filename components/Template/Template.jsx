@@ -27,8 +27,10 @@ function Template() {
         <div className="relative bg-gradient-to-t from-gray-200 to-blue-200">
 
             {/* Template start */}
-            <div className='mx-auto scale-75 sm:scale-75 md:scale-75 lg:scale-75 xl:scale-75 '>
-                <div ref={targetRef} id="template-wrapper" className="bg-white shadow-lg h-screen overflow-auto sm:min-h-screen sm:overflow-y-auto mx-auto ">
+            <div className="template-preview mx-auto scale-75 sm:scale-75 md:scale-75 lg:scale-75 xl:scale-75">
+                <div ref={targetRef}
+                    id="template-wrapper"
+                    className="bg-white shadow-lg h-screen overflow-auto mx-auto print:h-auto print:min-h-0 print:overflow-visible print:shadow-none">
                     <div className={`flex w-full bg-slate-800 sm:px-2 gap-10`} style={{ background: colors }}>
                         <div className="left-5 top-10 h-40 w-40 overflow-hidden sm:relative sm:rounded-full sm:p-0">
                             <Image
@@ -163,8 +165,8 @@ function Template() {
                                     <div className="flex flex-col">
                                         {employment?.[0] && employment?.[0].map((job, index) => (
                                             <div key={index} className="flex flex-col">
-                                                {job.employer && job.jobtitle ? <p className="text-lg font-bold text-gray-700">{job.employer} | {job.jobtitle}</p> : null}
-                                                {job.startdate && job.enddate ? <p className="text-sm font-semibold text-gray-700">{dateConverter(job.startdate, job.enddate)}</p> : null}
+                                                {(job.employer || job.jobtitle) ? <p className="text-lg font-bold text-gray-700">{job.employer} {(job.employer && job.jobtitle) ? "|" : ""} {job.jobtitle}</p> : null}
+                                                {(job.startdate || job.enddate) ? <p className="text-sm font-semibold text-gray-700">{dateConverter(job.startdate, job.enddate, job.ongoing)}</p> : null}
                                                 {job.description && (
                                                     <>
                                                         <p className="mb-1 mt-2 text-sm font-semibold text-gray-700">{job.description !== "<p><br></p>" && "Key Responsibilities"}</p>
@@ -183,14 +185,42 @@ function Template() {
                                     <div className="border-top-color my-3 w-20 border-2"></div>
 
                                     <div className="flex flex-col space-y-2">
-                                        {education?.[0] && education?.[0].map((edc, index) => (
-                                            <div key={index} className="flex flex-col">
-                                                {edc.degree && edc.institution && edc.institutioncity ? <p className="text-lg font-medium">
-                                                    <span className="text-green-700">{edc.degree}</span>
-                                                    , {edc.institution}, {edc.institutioncity}.</p> : null}
-                                                {edc.startdate || edc.enddate ? <p className="text-sm font-semibold text-gray-700">{edc.startdate} - {edc.enddate}</p> : null}
-                                            </div>
-                                        ))}
+                                        {education?.[0] &&
+                                            education?.[0].map((edc, index) => {
+                                                const educationInfo = [
+                                                    edc.degree,
+                                                    edc.institution,
+                                                    edc.institutioncity,
+                                                ].filter(Boolean);
+
+                                                return (
+                                                    <div key={index} className="flex flex-col">
+                                                        {educationInfo.length > 0 && (
+                                                            <p className="text-lg font-medium">
+                                                                {educationInfo.map((item, itemIndex) => (
+                                                                    <React.Fragment key={itemIndex}>
+                                                                        {itemIndex > 0 && ", "}
+                                                                        {itemIndex === 0 ? (
+                                                                            <span>{item}</span>
+                                                                        ) : (
+                                                                            item
+                                                                        )}
+                                                                    </React.Fragment>
+                                                                ))}
+                                                                .
+                                                            </p>
+                                                        )}
+
+                                                        {(edc.startdate || edc.enddate) && (
+                                                            <p className="text-sm font-semibold text-gray-700">
+                                                                {edc.startdate}
+                                                                {(edc.startdate && edc.enddate) && (edc.startdate !== edc.enddate) ? " - " : ""}
+                                                                {(edc.ongoing || edc.startdate === edc.enddate) ? " - Present" : edc.enddate ? edc.enddate : ""}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
                                     </div>
                                 </div>
 
