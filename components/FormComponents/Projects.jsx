@@ -1,6 +1,6 @@
 import { useState, useContext } from "react";
 import Typography from "@mui/material/Typography";
-import { Button } from "@mui/material";
+import { Button, Autocomplete, Chip } from "@mui/material";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import Grid from "@mui/material/Grid";
@@ -24,7 +24,6 @@ export default function Projects({
 }) {
   const getData = useContext(DataContext);
   const [expanded, setExpanded] = useState(false);
-
   const handleChange = (panel) => (_, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
   };
@@ -32,6 +31,17 @@ export default function Projects({
   const [projectDetails, setProjectDetails] = getData.project;
   const [disabledEditor, setDisabledEditor] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [liveLinkErrors, setLiveLinkErrors] = useState({});
+  const [githubLinkErrors, setGithubLinkErrors] = useState({});
+
+  const isValidUrl = (value) => {
+    try {
+      const url = new URL(value);
+      return ["http:", "https:"].includes(url.protocol);
+    } catch {
+      return false;
+    }
+  };
 
   const handleOk = () => {
     setOpenModal(false)
@@ -74,6 +84,9 @@ export default function Projects({
         startdate: "",
         enddate: "",
         description: "",
+        technologies: "",
+        liveurl: "",
+        githuburl: ""
       },
     ]);
   };
@@ -188,7 +201,7 @@ export default function Projects({
                     rowSpacing={3}
                     columnSpacing={{ xs: 1, sm: 2, md: 3 }}
                   >
-                    <Grid item xs={16} md={6}>
+                    <Grid item xs={16} md={5}>
                       <TextField
                         id="projecttitle"
                         label="Project Title"
@@ -205,7 +218,7 @@ export default function Projects({
                         onChange={(e) => handleInputChange(e, key)}
                       />
                     </Grid>
-                    <Grid item xs={16} sm={16} md={6} sx={{ display: "flex", flexDirection: { xs: 'column', sm: 'row' }, gap: '20px' }}>
+                    <Grid item xs={16} sm={16} md={7} sx={{ display: "flex", flexDirection: { xs: 'column', sm: 'row' }, gap: '20px' }}>
                       <TextField
                         id="projectstartdate"
                         label="Start Date"
@@ -238,6 +251,117 @@ export default function Projects({
                         InputLabelProps={{ shrink: true }}
                         onChange={(e) => handleInputChange(e, key)}
                       />
+                    </Grid>
+                    <Grid item xs={16} md={15}>
+                      <Grid container spacing={2}>
+                        <Grid item xs={16} sm={16} md={15}>
+                          <Autocomplete
+                            multiple
+                            freeSolo
+                            options={[]}
+                            value={Array.isArray(project.technologies) ? project.technologies : []}
+                            onChange={(_, newValue) => {
+                              const updatedProjectDetails = [...projectDetails];
+
+                              updatedProjectDetails[key].technologies = Array.from(
+                                new Set(
+                                  newValue
+                                    .map((item) => item.trim())
+                                    .filter(Boolean)
+                                )
+                              );
+
+                              setProjectDetails(updatedProjectDetails);
+                            }}
+                            renderTags={(value, getTagProps) =>
+                              value.map((item, index) => (
+                                <Chip
+                                  label={item}
+                                  {...getTagProps({ index })}
+                                  key={`${item}-${index}`}
+                                />
+                              ))
+                            }
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label="Technologies Used"
+                                placeholder="Write something and press Enter"
+                              />
+                            )}
+                          />
+                        </Grid>
+
+                        <Grid item xs={16}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexDirection: { xs: "column", md: "row" },
+                              gap: 2,
+                            }}
+                          >
+                            <TextField
+                              id="liveurl"
+                              label="Live Link"
+                              placeholder="https://example.com"
+                              type="url"
+                              name="liveurl"
+                              value={project.liveurl}
+                              error={Boolean(liveLinkErrors[key])}
+                              helperText={liveLinkErrors[key] || " "}
+                              fullWidth
+                              sx={{
+                                borderRadius: "5px",
+                                flex: 1,
+                              }}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                handleInputChange(e, key);
+
+                                setLiveLinkErrors((prev) => ({
+                                  ...prev,
+                                  [key]:
+                                    value.trim() === ""
+                                      ? ""
+                                      : isValidUrl(value)
+                                        ? ""
+                                        : "Enter a valid URL starting with http:// or https://",
+                                }));
+                              }}
+                            />
+
+                            <TextField
+                              id="githuburl"
+                              label="Github Link"
+                              placeholder="https://github.com/username/repo"
+                              type="url"
+                              name="githuburl"
+                              value={project.githuburl}
+                              error={Boolean(githubLinkErrors[key])}
+                              helperText={githubLinkErrors[key] || " "}
+                              fullWidth
+                              sx={{
+                                borderRadius: "5px",
+                                flex: 1,
+                              }}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                handleInputChange(e, key);
+
+                                setGithubLinkErrors((prev) => ({
+                                  ...prev,
+                                  [key]:
+                                    value.trim() === ""
+                                      ? ""
+                                      : isValidUrl(value)
+                                        ? ""
+                                        : "Enter a valid URL starting with http:// or https://",
+                                }));
+                              }}
+                            />
+                          </Box>
+                        </Grid>
+                      </Grid>
                     </Grid>
                     <Grid item xs={16} md={12}>
                       <Typography>Description</Typography>

@@ -20,8 +20,18 @@ import { Facebook, LinkedIn, Github, Website } from "../SvgComponents/SVG";
 export default function SocialLinks() {
   const getData = useContext(DataContext);
   const [expanded, setExpanded] = useState(false);
+  const [linkErrors, setLinkErrors] = useState({});
   const handleChange = (panel) => (_, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
+  };
+
+  const isValidUrl = (value) => {
+    try {
+      const url = new URL(value);
+      return ["http:", "https:"].includes(url.protocol);
+    } catch {
+      return false;
+    }
   };
 
   const [socialSites, setSocialSites] = getData.socials;
@@ -66,8 +76,8 @@ export default function SocialLinks() {
           return "";
       }
     };
-    obj["icon"] = getIconForLabel(obj["label"]);
     obj[name] = value;
+    obj.icon = getIconForLabel(obj.label);
     clone[inputKey] = obj;
     setSocialSites([...clone]);
     calculateProfileCompleteness();
@@ -189,17 +199,46 @@ export default function SocialLinks() {
                       </Grid>
                       <Grid item xs={15} sm={6} md={6}>
                         <TextField
-                          id="socialslink"
+                          id={`socialslink-${key}`}
                           label="Link"
                           placeholder="https://example.com"
-                          type="text"
+                          type="url"
                           name="linkurl"
                           value={social.linkurl}
+                          error={Boolean(linkErrors[key])}
+                          helperText={linkErrors[key] || " "}
                           sx={{
                             width: "100%",
                             borderRadius: "5px",
                           }}
-                          onChange={(e) => handleInputChange(e, key)}
+                          onChange={(e) => {
+                            const value = e.target.value;
+
+                            handleInputChange(e, key);
+
+                            setLinkErrors((prev) => ({
+                              ...prev,
+                              [key]:
+                                value.trim() === ""
+                                  ? ""
+                                  : isValidUrl(value)
+                                    ? ""
+                                    : "Enter a valid URL starting with http:// or https://",
+                            }));
+                          }}
+                          onBlur={(e) => {
+                            const value = e.target.value.trim();
+
+                            setLinkErrors((prev) => ({
+                              ...prev,
+                              [key]:
+                                value === ""
+                                  ? "Link is required"
+                                  : isValidUrl(value)
+                                    ? ""
+                                    : "Enter a valid URL starting with http:// or https://",
+                            }));
+                          }}
                         />
                       </Grid>
                     </Grid>
