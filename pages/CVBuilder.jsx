@@ -80,6 +80,7 @@ export default function CVBuilder() {
   ]);
   const [skillDetails, setSkillDetails] = useState([
     {
+      id: crypto.randomUUID(), 
       skill: "",
       level: "",
     },
