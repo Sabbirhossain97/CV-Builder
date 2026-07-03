@@ -213,11 +213,7 @@ function Template2() {
                                                             ? "_blank"
                                                             : undefined
                                                     }
-                                                    rel={
-                                                        social.linkurl
-                                                            ? "noreferrer"
-                                                            : undefined
-                                                    }
+                                                    rel="noreferrer"
                                                     className="flex items-center justify-end gap-2 break-all hover:underline"
                                                 >
                                                     <span>
