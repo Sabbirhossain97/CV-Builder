@@ -80,6 +80,7 @@ export default function CVBuilder() {
   ]);
   const [skillDetails, setSkillDetails] = useState([
     {
+      id: crypto.randomUUID(), 
       skill: "",
       level: "",
     },
@@ -91,6 +92,9 @@ export default function CVBuilder() {
       startdate: "",
       enddate: "",
       description: "",
+      technologies: [],
+      liveurl: "",
+      githuburl: ""
     },
   ]);
 
@@ -431,32 +435,30 @@ export default function CVBuilder() {
 
             {showTemplate && windowWidth < 1199 ?
               <div className={`${showTemplate && windowWidth < 1199 && 'animate-slide-from-right'} z-100 absolute top-0 right-0 left-0 bottom-0 custom-end:hidden `}>
-                <Template />
+                <TemplateView />
               </div> : null
             }
           </Box>
           {/* template section start */}
-          <Box
-            sx={{
-              width: {
-                xs: "100%",
-                sm: "100%",
-                md: "100%",
-                lg: "50%",
-                xl: "50%",
-              },
-              position: {
-                lg: "fixed",
-                xl: "fixed",
-              },
-              top: {
-                lg: "0%",
-                xl: 0,
-              },
-              right: 0,
-              height: "100%",
-            }}
-          >
+            <Box
+              sx={{
+                display: {
+                  xs: "none",
+                  lg: "block",
+                },
+                width: {
+                  lg: "50%",
+                  xl: "50%",
+                },
+                position: {
+                  lg: "fixed",
+                  xl: "fixed",
+                },
+                top: 0,
+                right: 0,
+                height: "100%",
+              }}
+            >
             <TemplateView />
           </Box>
           {/* template section end */}

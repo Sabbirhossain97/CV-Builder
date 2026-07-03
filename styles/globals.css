@@ -4,7 +4,6 @@
     img {
         @apply inline-block;
     }
-
 }
 
 @media print {
@@ -34,11 +33,51 @@
         -webkit-print-color-adjust: exact;
     }
 
+          .template-2-layout {
+              position: relative !important;
+              display: flex !important;
+              align-items: stretch !important;
+              min-height: 100vh !important;
+              overflow: visible !important;
+          }
+    
+          /* Repeats the dark background on every PDF page */
+          .template-2-sidebar-bg {
+              position: fixed !important;
+              top: 0 !important;
+              left: 0 !important;
+              width: 276px !important;
+              height: 100vh !important;
+              z-index: 0 !important;
+          }
+    
+          /* Sidebar text/content stays only on the first page */
+          .template-2-sidebar-content {
+              position: relative !important;
+              z-index: 1 !important;
+              width: 276px !important;
+              min-width: 276px !important;
+              flex: 0 0 276px !important;
+              box-sizing: border-box !important;
+              background: transparent !important;
+          }
+    
+          /* Main CV content */
+          .template-2-content {
+              position: relative !important;
+              z-index: 1 !important;
+              flex: 1 1 auto !important;
+              min-width: 0 !important;
+              width: auto !important;
+              box-sizing: border-box !important;
+          }
+
     @page {
         size: A4;
-        margin: 10mm;
+        margin: 0;
     }
 }
+
 @tailwind components;
 @tailwind utilities;
 

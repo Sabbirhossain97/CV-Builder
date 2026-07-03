@@ -220,7 +220,7 @@ export default function Education() {
                     <Grid item xs={16} md={6}>
                       <TextField
                         id="educationdegree"
-                        label="Degree"
+                        label="Degree (e.g. B.Sc in CSE)"
                         name="degree"
                         value={education.degree}
                         type="text"

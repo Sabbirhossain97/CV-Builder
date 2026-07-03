@@ -16,18 +16,199 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { AntSwitch } from "../helpers/helpers";
 import { DataContext } from "../../pages/CVBuilder";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+  sortableKeyboardCoordinates,
+} from "@dnd-kit/sortable";
+
+import { CSS } from "@dnd-kit/utilities";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+
+function SortableSkillItem({
+  skills,
+  index,
+  expanded,
+  handleChange,
+  handleInputChange,
+  deleteAccordionSection,
+  showExpLevel,
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: skills.id,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    position: "relative",
+    zIndex: isDragging ? 10 : "auto",
+  };
+
+  return (
+    <Grid
+      ref={setNodeRef}
+      style={style}
+      container
+      columns={16}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        flexWrap: "nowrap",
+      }}
+    >
+      {/* Drag handle */}
+      <Grid item xs="auto">
+        <Box
+          ref={setActivatorNodeRef}
+          {...attributes}
+          {...listeners}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "grab",
+            color: "#8c8c8c",
+            pr: 1,
+            touchAction: "none",
+            userSelect: "none",
+            "&:active": {
+              cursor: "grabbing",
+            },
+          }}
+        >
+          <DragIndicatorIcon />
+        </Box>
+      </Grid>
+
+      <Grid item xs sx={{ minWidth: 0 }}>
+        <Accordion
+          expanded={expanded === skills.id}
+          onChange={handleChange(skills.id)}
+          sx={{
+            backgroundColor: "white",
+            boxShadow: "none",
+            border: "1px solid #e7eaf4",
+          }}
+        >
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography sx={{ width: "100%" }}>
+              {skills.skill || "(Not Specified)"}
+            </Typography>
+          </AccordionSummary>
+
+          <AccordionDetails>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Skill"
+                  name="skill"
+                  value={skills.skill}
+                  fullWidth
+                  onChange={(e) => handleInputChange(e, index)}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Level</InputLabel>
+
+                  <Select
+                    label="Level"
+                    name="level"
+                    value={skills.level}
+                    disabled={showExpLevel}
+                    onChange={(e) => handleInputChange(e, index)}
+                  >
+                    {["⭐", "⭐⭐", "⭐⭐⭐", "⭐⭐⭐⭐", "⭐⭐⭐⭐⭐"].map(
+                      (level) => (
+                        <MenuItem key={level} value={level}>
+                          {level}
+                        </MenuItem>
+                      )
+                    )}
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </AccordionDetails>
+        </Accordion>
+      </Grid>
+
+      <Grid item xs="auto">
+        {index > 0 && (
+          <DeleteOutlineOutlinedIcon
+            sx={{
+              ml: 1,
+              color: "red",
+              cursor: "pointer",
+            }}
+            onClick={() => deleteAccordionSection(index)}
+          />
+        )}
+      </Grid>
+    </Grid>
+  );
+}
 
 export default function Skills() {
   const getData = useContext(DataContext);
   const [expanded, setExpanded] = useState(false);
 
-  const handleChange = (panel) => (_, isExpanded) => {
-    setExpanded(isExpanded ? panel : false);
+  const handleChange = (id) => (_, isExpanded) => {
+    setExpanded(isExpanded ? id : false);
   };
 
   const [skillDetails, setSkillDetails] = getData.skills;
   const [showExpLevel, setShowExpLevel] = getData.skillExpLevel;
-  const [completedSections, setCompletedSections] = getData.completed
+  const [completedSections, setCompletedSections] = getData.completed;
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = ({ active, over }) => {
+    if (!over || active.id === over.id) return;
+
+    setSkillDetails((currentSkills) => {
+      const oldIndex = currentSkills.findIndex(
+        (item) => item.id === active.id
+      );
+
+      const newIndex = currentSkills.findIndex(
+        (item) => item.id === over.id
+      );
+
+      return arrayMove(currentSkills, oldIndex, newIndex);
+    });
+  };
 
   const deleteAccordionSection = (id) => {
     const result = skillDetails.filter((item, key) => {
@@ -42,6 +223,7 @@ export default function Skills() {
     setSkillDetails([
       ...skillDetails,
       {
+        id: crypto.randomUUID(),
         skill: "",
         level: "",
       },
@@ -117,116 +299,39 @@ export default function Skills() {
       </Stack>
 
       <Box sx={{ display: 'flex', flexDirection: "column", gap: '10px', marginTop: "15px", flexGrow: 1 }}>
-        {skillDetails.map((skills, key) => (
-          <Grid key={key} container columns={16} sx={{ display: 'flex', alignItems: 'center' }}>
-            <Grid item xs={14} sm={15} md={15}>
-              <Accordion
-                expanded={expanded === key}
-                onChange={handleChange(key)}
-                sx={{
-                  backgroundColor: "white",
-                  boxShadow: "none",
-                  border: "1px solid",
-                  borderColor: "#e7eaf4",
-                }}
-              >
-                <AccordionSummary
-                  expandIcon={<ExpandMoreIcon color="#e7eaf4" />}
-                  aria-controls="panel1bh-content"
-                  id="panel1bh-header"
-                >
-                  <Typography sx={{ width: "100%", flexShrink: 0 }}>
-                    {skills.skill ? skills.skill : "(Not Specified)"}
-                  </Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <Grid
-                    container
-                    rowSpacing={3}
-                    columnSpacing={{ xs: 1, sm: 2, md: 3 }}
-                  >
-                    <Grid item xs={15} sm={6} md={6}>
-                      <TextField
-                        id="skilltitle"
-                        label="Skill"
-                        type="text"
-                        value={skills.skill}
-                        name="skill"
-                        sx={{
-                          width: "100%",
-                          borderRadius: "5px",
-                        }}
-                        onChange={(e) => handleInputChange(e, key)}
-                      />
-                    </Grid>
-                    <Grid item xs={15} sm={6} md={6}>
-                      <FormControl sx={{ width: "100%" }}>
-                        <InputLabel
-                          id="demo-simple-select-helper-label"
-                        >
-                          Level
-                        </InputLabel>
-                        <Select
-                          id="skilllevel"
-                          label="level"
-                          disabled={showExpLevel ? true : false}
-                          value={skills.level}
-                          name="level"
-                          onChange={(e) => handleInputChange(e, key)}
-                        >
-                          {[
-                            {
-                              value: 1,
-                              name: "⭐",
-                            },
-                            {
-                              value: 2,
-                              name: "⭐⭐",
-                            },
-                            {
-                              value: 3,
-                              name: "⭐⭐⭐",
-                            },
-                            {
-                              value: 4,
-                              name: "⭐⭐⭐⭐",
-                            },
-                            {
-                              value: 5,
-                              name: "⭐⭐⭐⭐⭐",
-                            },
-                          ].map((item, key) => (
-                            <MenuItem
-                              defaultValue={skillDetails.level}
-                              value={item.name}
-                              key={key}
-                            >
-                              {item.name}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                  </Grid>
-                </AccordionDetails>
-              </Accordion>
-            </Grid>
-            <Grid item md="auto">
-              {key > 0 && <DeleteOutlineOutlinedIcon
-                sx={{
-                  marginLeft: "5px",
-                  fontSize: {
-                    xs: '20px',
-                    md: '25px'
-                  },
-                  color: "red",
-                  cursor: "pointer"
-                }}
-                onClick={() => deleteAccordionSection(key)}
-              />}
-            </Grid>
-          </Grid>
-        ))}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={skillDetails.map((item) => item.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+                marginTop: "15px",
+                flexGrow: 1,
+              }}
+            >
+              {skillDetails.map((skills, index) => (
+                <SortableSkillItem
+                  key={skills.id}
+                  skills={skills}
+                  index={index}
+                  expanded={expanded}
+                  handleChange={handleChange}
+                  handleInputChange={handleInputChange}
+                  deleteAccordionSection={deleteAccordionSection}
+                  showExpLevel={showExpLevel}
+                />
+              ))}
+            </Box>
+          </SortableContext>
+        </DndContext>
       </Box>
       <Grid container columns={16} sx={{ display: 'flex', alignItems: 'center' }}>
         <Grid item xs={14} sm={15} md={15}>
