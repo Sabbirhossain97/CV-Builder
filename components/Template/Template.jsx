@@ -1,7 +1,7 @@
 import React from 'react'
 import { useState, useContext, useRef } from 'react'
 import { DataContext } from '../../pages/CVBuilder'
-import { Form, Email, Phone, Location} from '../SvgComponents/SVG';
+import { Form, Email, Phone, Location } from '../SvgComponents/SVG';
 import { months, parseDescription, parseProjectDetails, parseActivityDetails, colorPicker, dateConverter } from '../helpers/helpers';
 import ReactToPrint from 'react-to-print';
 import Tooltip from '@mui/material/Tooltip';
@@ -31,8 +31,6 @@ function Template() {
     const handleColorChange = (name) => {
         setColors(name)
     }
-
-    console.log(project, 'project')
 
     return (
         <div className="template-preview mx-auto scale-75 sm:scale-75 md:scale-75 lg:scale-75 xl:scale-75">
@@ -93,18 +91,21 @@ function Template() {
                                 <h2 className="font-poppins text-top-color text-lg font-bold" style={{ color: colors }}>Skills</h2>
                                 <div className="border-top-color my-3 w-20 border-2"></div>
                                 <>
-                                    {showExpLevel ? (<div className='flex gap-2 flex-wrap'>
-                                        {skills?.[0].some((entry) => Object.values(entry).some((item) => item !== "")) && skills?.[0].map((item, index) => (
-                                            <div key={index} className="bg-slate-800 flex justify-center items-center border flex-wrap rounded-md">
-                                                <p className="px-3 py-1 text-sm text-white">{item.skill}</p>
-                                            </div>
-                                        ))}
-                                    </div>) : (skills?.[0] && skills?.[0].map((item, index) => (
-                                        <div key={index} className="my-1 flex items-center justify-between">
-                                            <div className="">{item.skill}</div>
-                                            <div>{item.level} </div>
+                                    {!showExpLevel ? (
+                                        <div className='flex gap-2 flex-wrap'>
+                                            {skills?.[0].some((entry) => Object.values(entry).some((item) => item !== "")) && skills?.[0].map((item, index) => (
+                                                <div key={index} className="bg-slate-800 flex justify-center items-center border flex-wrap rounded-md">
+                                                    <p className="px-3 py-1 text-sm text-white">{item.skill}</p>
+                                                </div>
+                                            ))}
                                         </div>
-                                    )))}
+                                    ) : (
+                                        skills?.[0] && skills?.[0].map((item, index) => (
+                                            <div key={index} className="my-1 flex items-center justify-between">
+                                                <div className="">{item.skill}</div>
+                                                <div>{item.level} </div>
+                                            </div>
+                                        )))}
                                 </>
                             </div>
 

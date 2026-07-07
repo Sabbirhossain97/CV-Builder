@@ -117,7 +117,7 @@ function Template2() {
                                             .map((item, index) => (
                                                 <li key={index}>
                                                     {item.skill}
-                                                    {!showExpLevel && item.level
+                                                    {showExpLevel && item.level
                                                         ? ` — ${item.level}`
                                                         : ""}
                                                 </li>

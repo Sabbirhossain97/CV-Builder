@@ -83,6 +83,7 @@ export default function CVBuilder() {
       id: crypto.randomUUID(), 
       skill: "",
       level: "",
+      levelCount: null,
     },
   ]);
 
@@ -146,7 +147,7 @@ export default function CVBuilder() {
   ]);
 
   const [customSection, setCustomSection] = useState([])
-  const [showExpLevel, setShowExpLevel] = useState(false);
+  const [showExpLevel, setShowExpLevel] = useState(true);
   const [showLangLevel, setShowLangLevel] = useState(false);
   const [showTemplate, setShowTemplate] = useState(false)
   const [windowWidth, setWindowWidth] = useState(null);

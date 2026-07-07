@@ -60,6 +60,7 @@ export default function SocialLinks() {
   const handleInputChange = (e, inputKey) => {
     const { name, value } = e.target;
     let clone = [...socialSites];
+    console.log(name,value)
     let obj = clone[inputKey];
 
     const getIconForLabel = (label) => {
