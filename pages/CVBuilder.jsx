@@ -115,7 +115,7 @@ export default function CVBuilder() {
       level: "",
     },
   ]);
-  const [hobbiesDetails, setHobbiesDetails] = useState({ hobbies: "" });
+  const [hobbiesDetails, setHobbiesDetails] = useState({ hobbies: [] });
   const [referenceDetails, setReferenceDetails] = useState([
     {
       referrername: "",

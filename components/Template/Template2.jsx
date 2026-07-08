@@ -153,7 +153,7 @@ function Template2() {
                             )}
 
                         {/* Interests */}
-                        {interests && (
+                        {hobbies[0].length > 0 && (
                             <section className="mt-8">
                                 <h2 className="text-[18px] font-bold uppercase tracking-wide">
                                     Interests
@@ -162,7 +162,7 @@ function Template2() {
                                 <div className="mt-3 h-[1px] w-full bg-white/40" />
 
                                 <ul className="mt-4 list-disc space-y-2 pl-5 text-[13px] leading-[1.45]">
-                                    {interests.split(",").map(
+                                    {hobbies[0].map(
                                         (item, index) =>
                                             item.trim() && (
                                                 <li key={index}>{item.trim()}</li>
@@ -550,7 +550,7 @@ function Template2() {
                                         .map((ref, index) => (
                                             <div
                                                 key={index}
-                                                className="mt-5 text-[14px] leading-[1.45]"
+                                                className="mt-2 text-[14px] leading-[1.45]"
                                             >
                                                 <p className="font-bold">
                                                     {[

@@ -20,7 +20,7 @@ function Template() {
     const [{ summary: about }] = summary[0];
     const [showExpLevel] = skillExpLevel;
     const [showLangLevel] = langLevel;
-    const { hobbies: interests } = hobbies[0];
+    const {interests: test} = hobbies[0];
     const [showTemplate, setShowTemplate] = previewTemplate;
     const [tabValue, setTabValue] = React.useState('1');
 
@@ -149,11 +149,11 @@ function Template() {
                                 </div>
                             }
 
-                            {interests && <div className="py-3">
+                            {hobbies[0].length > 0 && <div className="py-3">
                                 <h2 className="font-poppins text-top-color text-lg font-bold" style={{ color: colors }}>Interests</h2>
                                 <div className="border-top-color my-3 w-20 border-2"></div>
                                 <div className='flex flex-wrap gap-2'>
-                                    {interests.split(",").map((item, index) => (
+                                    {hobbies[0].map((item, index) => (
                                         <div key={index} className="bg-slate-800 flex items-center border flex-wrap rounded-md">
                                             <p className="px-3 py-1 text-sm text-white">{item}</p>
                                         </div>

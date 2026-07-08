@@ -6,6 +6,7 @@ import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import { DataContext } from "../../pages/CVBuilder";
+import { Button, Autocomplete, Chip } from "@mui/material";
 
 export default function Hobbies({
   deleteCustomSection,
@@ -18,6 +19,7 @@ export default function Hobbies({
     const { name, value } = e.target;
     setHobbiesDetails({ [name]: value });
   };
+
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", marginTop: "20px" }}>
@@ -42,7 +44,7 @@ export default function Hobbies({
             }}
             onClick={() => {
               deleteCustomSection(sectionId);
-              setHobbiesDetails({ hobbies: "" });
+              setHobbiesDetails({ hobbies: [] });
             }}
           />
         </Grid>
@@ -50,21 +52,39 @@ export default function Hobbies({
 
       <Grid container columns={16}>
         <Grid item xs={15} md={15}>
-          <TextField
-            id="hobbies"
-            label="What do you like?"
-            placeholder="e.g. Painting,Skydiving,Gaming"
-            type="text"
-            name="hobbies"
-            value={hobbiesDetails.hobbies}
-            sx={{
-              width: "100%",
-              borderRadius: "5px",
+          <Autocomplete
+            multiple
+            freeSolo
+            options={[]}
+            value={hobbiesDetails}
+            onChange={(_, newValue) => {
+
+              // let updatedHobbies= Array.from(
+              //   new Set(
+              //     newValue
+              //       .map((item) => item.trim())
+              //       .filter(Boolean)
+              //   )
+              // );
+
+              setHobbiesDetails(newValue);
             }}
-            InputProps={{
-              disableUnderline: true,
-            }}
-            onChange={(e) => handleInputChange(e)}
+            renderTags={(value, getTagProps) =>
+              value.map((item, index) => (
+                <Chip
+                  label={item}
+                  {...getTagProps({ index })}
+                  key={`${item}-${index}`}
+                />
+              ))
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="What do you like?"
+                placeholder="Write something and press Enter"
+              />
+            )}
           />
         </Grid>
       </Grid>

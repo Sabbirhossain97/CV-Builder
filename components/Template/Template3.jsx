@@ -5,7 +5,6 @@ import Tooltip from "@mui/material/Tooltip";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
-
 import { DataContext } from "../../pages/CVBuilder";
 import {
     parseDescription,
@@ -515,7 +514,7 @@ function Template3() {
                                             .map((language, index) => (
                                                 <div
                                                     key={index}
-                                                    className="flex items-center justify-between gap-3 rounded-lg bg-gray-50 px-3 py-2"
+                                                    className="flex items-center justify-between gap-3 rounded- py-2"
                                                 >
                                                     <span className="text-[13px] font-semibold text-gray-700">
                                                         {language.name}
@@ -563,7 +562,6 @@ function Template3() {
                                                     target={social.linkurl ? "_blank" : undefined}
                                                     rel="noreferrer"
                                                     className="flex items-center gap-2 font-medium hover:underline"
-                                                    style={{ color: primaryColor }}
                                                 >
                                                     {social.icon}
                                                     <span className="break-all">
@@ -575,18 +573,17 @@ function Template3() {
                                 </section>
                             )}
 
-                            {interests && (
+                            {hobbies[0].length > 0 && (
                                 <section>
                                     <SectionTitle title="Interests" />
 
                                     <div className="flex flex-wrap gap-2">
-                                        {interests
-                                            .split(",")
+                                        {hobbies[0]
                                             .filter((item) => item.trim())
                                             .map((item, index) => (
                                                 <span
                                                     key={index}
-                                                    className="rounded-full px-3 py-1 text-[11px] font-semibold "
+                                                    className="rounded-full px-3 py-1 text-[11px] text-white font-semibold "
                                                     style={{ backgroundColor: primaryColor }}
                                                 >
                                                     {item.trim()}
