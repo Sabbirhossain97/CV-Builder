@@ -163,7 +163,7 @@ function Template3() {
                                 <section className="mb-9">
                                     <SectionTitle
                                         title="Professional Experience"
-                                        
+
                                     />
 
                                     <div className="space-y-6">
@@ -330,9 +330,12 @@ function Template3() {
                                                         />
 
                                                         <h3 className="text-[15px] font-bold text-gray-800">
-                                                            {[item.role, item.title, item.institution]
+                                                            {[item.role, item.title]
                                                                 .filter(Boolean)
-                                                                .join(" | ")}
+                                                                .join(" - ")}
+                                                        </h3>
+                                                        <h3 className="text-[13px] font-medium text-gray-800">
+                                                            {item.institution}
                                                         </h3>
 
                                                         {(item.startdate || item.enddate) && (
@@ -349,7 +352,7 @@ function Template3() {
                                                         )}
 
                                                         {item.description && (
-                                                            <ul className="mt-3 list-disc space-y-1 pl-5 text-[13px] leading-5 text-gray-600">
+                                                            <ul className="mt-2 list-disc space-y-1 pl-5 text-[13px] leading-5 text-gray-600">
                                                                 {parseActivityDetails(item.description)}
                                                             </ul>
                                                         )}
@@ -395,11 +398,17 @@ function Template3() {
                                                         </p>
 
                                                         {(ref.email || ref.phone || ref.address) && (
-                                                            <p className="mt-1 break-words text-gray-600">
-                                                                {[ref.email, ref.phone, ref.address]
-                                                                    .filter(Boolean)
-                                                                    .join(" | ")}
-                                                            </p>
+                                                            <>
+                                                                <p className="mt-1 break-words text-gray-600">
+                                                                    {ref.address}
+                                                                </p>
+                                                                <p className="mt-1 break-words text-gray-600">
+                                                                    {ref.email}
+                                                                </p>
+                                                                <p className="mt-1 break-words text-gray-600">
+                                                                    {ref.phone}
+                                                                </p>
+                                                            </>
                                                         )}
                                                     </div>
                                                 ))}
@@ -418,8 +427,8 @@ function Template3() {
                                         {skills[0]
                                             .filter((skill) => skill.skill)
                                             .map((skill, index) => {
-                                                
-                                                const percentage = (skill.levelCount / 5) * 100;
+
+                                                const percentage = skill.levelCount ? (skill.levelCount / 5) * 100 : 0;
 
                                                 return (
                                                     <div key={index}>
@@ -430,7 +439,7 @@ function Template3() {
 
                                                         </div>
 
-                                                       {showExpLevel && <div className="h-2 overflow-hidden rounded-full bg-gray-200">
+                                                        {showExpLevel && skill.levelCount && <div className="h-2 overflow-hidden rounded-full bg-gray-200">
                                                             <div
                                                                 className="h-full rounded-full transition-all"
                                                                 style={{
@@ -438,7 +447,7 @@ function Template3() {
                                                                     backgroundColor: primaryColor,
                                                                 }}
                                                             />
-                                                        </div> }
+                                                        </div>}
                                                     </div>
                                                 );
                                             })}
@@ -552,7 +561,7 @@ function Template3() {
                                                 <span>{phone}</span>
                                             </div>
                                         )}
-                                    
+
                                         {socials?.[0]
                                             ?.filter((social) => social.label || social.linkurl)
                                             .map((social, index) => (
@@ -594,7 +603,7 @@ function Template3() {
                             )}
                         </aside>
                     </div>
-                  
+
                 </main>
             </div>
 

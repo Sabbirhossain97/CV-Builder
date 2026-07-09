@@ -482,15 +482,19 @@ function Template2() {
                                                 {(item.role ||
                                                     item.title ||
                                                     item.institution) && (
-                                                        <h3 className="text-[16px] font-bold">
-                                                            {[
-                                                                item.role,
-                                                                item.title,
-                                                                item.institution,
-                                                            ]
-                                                                .filter(Boolean)
-                                                                .join(" | ")}
-                                                        </h3>
+                                                        <>
+                                                            <h3 className="text-[16px] font-bold">
+                                                                {[
+                                                                    item.role,
+                                                                    item.title,
+                                                                ]
+                                                                    .filter(Boolean)
+                                                                    .join(" - ")}
+                                                            </h3>
+                                                            <h3 className="text-[14px] font-medium">
+                                                                {item.institution}
+                                                            </h3>
+                                                        </>
                                                     )}
 
                                                 {(item.startdate || item.enddate) && (
@@ -565,15 +569,17 @@ function Template2() {
                                                 {(ref.address ||
                                                     ref.email ||
                                                     ref.phone) && (
-                                                        <p>
-                                                            {[
-                                                                ref.address,
-                                                                ref.email,
-                                                                ref.phone,
-                                                            ]
-                                                                .filter(Boolean)
-                                                                .join(" | ")}
-                                                        </p>
+                                                        <>
+                                                            <p>
+                                                                {ref.address}
+                                                            </p>
+                                                            <p>
+                                                                {ref.email}
+                                                            </p>
+                                                            <p>
+                                                                {ref.phone}
+                                                            </p>
+                                                        </>
                                                     )}
                                             </div>
                                         ))}

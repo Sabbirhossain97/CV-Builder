@@ -301,7 +301,8 @@ function Template() {
                                     <div className="flex flex-col ">
                                         {extraCurricular?.[0] && extraCurricular?.[0].map((item, index) => (
                                             <div key={index} className="flex flex-col">
-                                                {item.role && item.title && item.institution ? <p className="text-lg font-bold text-gray-700">{item.role} | {item.title} | {item.institution}</p> : null}
+                                                {item.role && item.title && item.institution ? <p className="text-lg font-bold text-gray-700">{item.role} - {item.title}</p> : null}
+                                                {item.institution ? <p className="text-[16px] font-medium text-gray-700">{item.institution}</p> : null }
                                                 {item.startdate && item.enddate ? <p className="text-sm font-bold text-gray-700">
                                                     {dateConverter(item.startdate, item.enddate)}
                                                 </p> : null}
@@ -329,7 +330,9 @@ function Template() {
                                                 {ref.referrername && ref.position && ref.organization && <p className="text-lg font-medium">
                                                     <span className="text-gray-700">{ref.referrername} - {ref.position} , {ref.organization}</span>
                                                 </p>}
-                                                {ref.address && ref.email && ref.phone ? <p className="text-sm font-normal text-gray-700">{ref.address} , {ref.email}, {ref.phone}</p> : null}
+                                                {ref.address ? <p className="text-sm font-normal text-gray-700">{ref.address} </p> : null}
+                                                {ref.email ? <p className="text-sm font-normal text-gray-700">{ref.email} </p> : null}
+                                                {ref.phone ? <p className="text-sm font-normal text-gray-700">{ref.phone} </p> : null}
                                             </div>
                                         ))}
                                     </div>
