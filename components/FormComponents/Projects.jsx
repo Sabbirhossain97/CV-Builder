@@ -414,7 +414,7 @@ export default function Projects({
             color="primary"
             onClick={addAccordionSection}
           >
-            <AddIcon sx={{ fontSize: "20px" }} /> Add one more course
+            <AddIcon sx={{ fontSize: "20px" }} /> Add one more project
           </Typography>
         </Grid>
       </Grid>

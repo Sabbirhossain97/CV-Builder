@@ -11,6 +11,7 @@ import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import Image from 'next/image';
 import Template2 from './Template2';
+import Template3 from "./Template3";
 
 const TemplateView = () => {
   const targetRef = useRef();
@@ -51,10 +52,11 @@ const TemplateView = () => {
             >
               <Tab label="Template 1" value="template_1" />
               <Tab label="Template 2" value="template_2" />
+              <Tab label="Template 3" value="template_3" />
             </Tabs>
           </Box>
         </div>
-          {tabValue === "template_1" ? <Template /> : <Template2 />}
+        {tabValue === "template_1" ? <Template /> : tabValue === "template_2" ? <Template2 /> : <Template3/>}
           <Tooltip title="Form" placement="top">
             <div
               onClick={() => setShowTemplate(!showTemplate)}

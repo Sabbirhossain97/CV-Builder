@@ -117,7 +117,7 @@ function Template2() {
                                             .map((item, index) => (
                                                 <li key={index}>
                                                     {item.skill}
-                                                    {!showExpLevel && item.level
+                                                    {showExpLevel && item.level
                                                         ? ` — ${item.level}`
                                                         : ""}
                                                 </li>
@@ -153,7 +153,7 @@ function Template2() {
                             )}
 
                         {/* Interests */}
-                        {interests && (
+                        {hobbies[0].length > 0 && (
                             <section className="mt-8">
                                 <h2 className="text-[18px] font-bold uppercase tracking-wide">
                                     Interests
@@ -162,7 +162,7 @@ function Template2() {
                                 <div className="mt-3 h-[1px] w-full bg-white/40" />
 
                                 <ul className="mt-4 list-disc space-y-2 pl-5 text-[13px] leading-[1.45]">
-                                    {interests.split(",").map(
+                                    {hobbies[0].map(
                                         (item, index) =>
                                             item.trim() && (
                                                 <li key={index}>{item.trim()}</li>
@@ -482,15 +482,19 @@ function Template2() {
                                                 {(item.role ||
                                                     item.title ||
                                                     item.institution) && (
-                                                        <h3 className="text-[16px] font-bold">
-                                                            {[
-                                                                item.role,
-                                                                item.title,
-                                                                item.institution,
-                                                            ]
-                                                                .filter(Boolean)
-                                                                .join(" | ")}
-                                                        </h3>
+                                                        <>
+                                                            <h3 className="text-[16px] font-bold">
+                                                                {[
+                                                                    item.role,
+                                                                    item.title,
+                                                                ]
+                                                                    .filter(Boolean)
+                                                                    .join(" - ")}
+                                                            </h3>
+                                                            <h3 className="text-[14px] font-medium">
+                                                                {item.institution}
+                                                            </h3>
+                                                        </>
                                                     )}
 
                                                 {(item.startdate || item.enddate) && (
@@ -550,7 +554,7 @@ function Template2() {
                                         .map((ref, index) => (
                                             <div
                                                 key={index}
-                                                className="mt-5 text-[14px] leading-[1.45]"
+                                                className="mt-2 text-[14px] leading-[1.45]"
                                             >
                                                 <p className="font-bold">
                                                     {[
@@ -565,15 +569,17 @@ function Template2() {
                                                 {(ref.address ||
                                                     ref.email ||
                                                     ref.phone) && (
-                                                        <p>
-                                                            {[
-                                                                ref.address,
-                                                                ref.email,
-                                                                ref.phone,
-                                                            ]
-                                                                .filter(Boolean)
-                                                                .join(" | ")}
-                                                        </p>
+                                                        <>
+                                                            <p>
+                                                                {ref.address}
+                                                            </p>
+                                                            <p>
+                                                                {ref.email}
+                                                            </p>
+                                                            <p>
+                                                                {ref.phone}
+                                                            </p>
+                                                        </>
                                                     )}
                                             </div>
                                         ))}

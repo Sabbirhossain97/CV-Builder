@@ -1,7 +1,7 @@
 import React from 'react'
 import { useState, useContext, useRef } from 'react'
 import { DataContext } from '../../pages/CVBuilder'
-import { Form, Email, Phone, Location} from '../SvgComponents/SVG';
+import { Form, Email, Phone, Location } from '../SvgComponents/SVG';
 import { months, parseDescription, parseProjectDetails, parseActivityDetails, colorPicker, dateConverter } from '../helpers/helpers';
 import ReactToPrint from 'react-to-print';
 import Tooltip from '@mui/material/Tooltip';
@@ -20,7 +20,7 @@ function Template() {
     const [{ summary: about }] = summary[0];
     const [showExpLevel] = skillExpLevel;
     const [showLangLevel] = langLevel;
-    const { hobbies: interests } = hobbies[0];
+    const {interests: test} = hobbies[0];
     const [showTemplate, setShowTemplate] = previewTemplate;
     const [tabValue, setTabValue] = React.useState('1');
 
@@ -31,8 +31,6 @@ function Template() {
     const handleColorChange = (name) => {
         setColors(name)
     }
-
-    console.log(project, 'project')
 
     return (
         <div className="template-preview mx-auto scale-75 sm:scale-75 md:scale-75 lg:scale-75 xl:scale-75">
@@ -93,18 +91,21 @@ function Template() {
                                 <h2 className="font-poppins text-top-color text-lg font-bold" style={{ color: colors }}>Skills</h2>
                                 <div className="border-top-color my-3 w-20 border-2"></div>
                                 <>
-                                    {showExpLevel ? (<div className='flex gap-2 flex-wrap'>
-                                        {skills?.[0].some((entry) => Object.values(entry).some((item) => item !== "")) && skills?.[0].map((item, index) => (
-                                            <div key={index} className="bg-slate-800 flex justify-center items-center border flex-wrap rounded-md">
-                                                <p className="px-3 py-1 text-sm text-white">{item.skill}</p>
-                                            </div>
-                                        ))}
-                                    </div>) : (skills?.[0] && skills?.[0].map((item, index) => (
-                                        <div key={index} className="my-1 flex items-center justify-between">
-                                            <div className="">{item.skill}</div>
-                                            <div>{item.level} </div>
+                                    {!showExpLevel ? (
+                                        <div className='flex gap-2 flex-wrap'>
+                                            {skills?.[0].some((entry) => Object.values(entry).some((item) => item !== "")) && skills?.[0].map((item, index) => (
+                                                <div key={index} className="bg-slate-800 flex justify-center items-center border flex-wrap rounded-md">
+                                                    <p className="px-3 py-1 text-sm text-white">{item.skill}</p>
+                                                </div>
+                                            ))}
                                         </div>
-                                    )))}
+                                    ) : (
+                                        skills?.[0] && skills?.[0].map((item, index) => (
+                                            <div key={index} className="my-1 flex items-center justify-between">
+                                                <div className="">{item.skill}</div>
+                                                <div>{item.level} </div>
+                                            </div>
+                                        )))}
                                 </>
                             </div>
 
@@ -148,11 +149,11 @@ function Template() {
                                 </div>
                             }
 
-                            {interests && <div className="py-3">
+                            {hobbies[0].length > 0 && <div className="py-3">
                                 <h2 className="font-poppins text-top-color text-lg font-bold" style={{ color: colors }}>Interests</h2>
                                 <div className="border-top-color my-3 w-20 border-2"></div>
                                 <div className='flex flex-wrap gap-2'>
-                                    {interests.split(",").map((item, index) => (
+                                    {hobbies[0].map((item, index) => (
                                         <div key={index} className="bg-slate-800 flex items-center border flex-wrap rounded-md">
                                             <p className="px-3 py-1 text-sm text-white">{item}</p>
                                         </div>
@@ -300,7 +301,8 @@ function Template() {
                                     <div className="flex flex-col ">
                                         {extraCurricular?.[0] && extraCurricular?.[0].map((item, index) => (
                                             <div key={index} className="flex flex-col">
-                                                {item.role && item.title && item.institution ? <p className="text-lg font-bold text-gray-700">{item.role} | {item.title} | {item.institution}</p> : null}
+                                                {item.role && item.title && item.institution ? <p className="text-lg font-bold text-gray-700">{item.role} - {item.title}</p> : null}
+                                                {item.institution ? <p className="text-[16px] font-medium text-gray-700">{item.institution}</p> : null }
                                                 {item.startdate && item.enddate ? <p className="text-sm font-bold text-gray-700">
                                                     {dateConverter(item.startdate, item.enddate)}
                                                 </p> : null}
@@ -328,7 +330,9 @@ function Template() {
                                                 {ref.referrername && ref.position && ref.organization && <p className="text-lg font-medium">
                                                     <span className="text-gray-700">{ref.referrername} - {ref.position} , {ref.organization}</span>
                                                 </p>}
-                                                {ref.address && ref.email && ref.phone ? <p className="text-sm font-normal text-gray-700">{ref.address} , {ref.email}, {ref.phone}</p> : null}
+                                                {ref.address ? <p className="text-sm font-normal text-gray-700">{ref.address} </p> : null}
+                                                {ref.email ? <p className="text-sm font-normal text-gray-700">{ref.email} </p> : null}
+                                                {ref.phone ? <p className="text-sm font-normal text-gray-700">{ref.phone} </p> : null}
                                             </div>
                                         ))}
                                     </div>

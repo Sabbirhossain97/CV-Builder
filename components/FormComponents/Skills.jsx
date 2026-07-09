@@ -24,7 +24,6 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -137,7 +136,7 @@ function SortableSkillItem({
                     label="Level"
                     name="level"
                     value={skills.level}
-                    disabled={showExpLevel}
+                    disabled={!showExpLevel}
                     onChange={(e) => handleInputChange(e, index)}
                   >
                     {["⭐", "⭐⭐", "⭐⭐⭐", "⭐⭐⭐⭐", "⭐⭐⭐⭐⭐"].map(
@@ -226,20 +225,39 @@ export default function Skills() {
         id: crypto.randomUUID(),
         skill: "",
         level: "",
+        levelCount: null,
       },
     ]);
   };
 
   const handleInputChange = (e, inputKey) => {
     const { name, value } = e.target;
+    let counter;
+    switch(value){
+      case "⭐":
+         counter = 1;
+         break;
+      case "⭐⭐":
+        counter = 2;
+        break;
+      case "⭐⭐⭐":
+        counter = 3;
+        break;
+      case "⭐⭐⭐⭐":
+        counter = 4;
+        break;
+      case "⭐⭐⭐⭐⭐":
+        counter = 5;
+        break;
+    }
     let clone = [...skillDetails];
     let obj = clone[inputKey];
     obj[name] = value;
+    obj["levelCount"] = counter
     clone[inputKey] = obj;
     setSkillDetails([...clone]);
     calculateProfileCompleteness();
   };
-
 
   const calculateProfileCompleteness = () => {
     const firstEntry = skillDetails[0];
@@ -287,7 +305,7 @@ export default function Skills() {
         style={{ marginTop: "-10px" }}
       >
         <AntSwitch
-          defaultChecked={!showExpLevel}
+          defaultChecked={showExpLevel}
           inputProps={{ "aria-label": "ant design" }}
           onChange={() => {
             setShowExpLevel(!showExpLevel);

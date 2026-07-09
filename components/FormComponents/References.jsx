@@ -271,7 +271,7 @@ export default function References({
                         color="primary"
                         onClick={addAccordionSection}
                     >
-                        <AddIcon sx={{ fontSize: "20px" }} /> Add one more course
+                        <AddIcon sx={{ fontSize: "20px" }} /> Add one more reference
                     </Typography>
                 </Grid>
             </Grid>
