@@ -1,80 +1,568 @@
-{/* <body class="bg-gray-100 text-gray-800">
-    <div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg mt-10">
-        <header class="flex items-center mb-6">
-            <img src="https://media.licdn.com/dms/image/D4D12AQHBgMttNT44bw/article-cover_image-shrink_720_1280/0/1673417990795?e=2147483647&v=beta&t=mRO_7zq02rlo8kfKq_mUTFEv9aC9Un7H9uj0xTD3-Z4" alt="Profile Picture" class="profile-pic mr-6">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900">John Doe</h1>
-                    <p class="text-lg text-gray-600">Web Developer | UI/UX Designer</p>
-                    <p class="text-gray-500 mt-2">Email: john.doe@example.com | Phone: (123) 456-7890 | LinkedIn: linkedin.com/in/johndoe</p>
-                </div>
-        </header>
+import React, { useContext, useRef, useState } from "react";
+import ReactToPrint from "react-to-print";
+import { DataContext } from "../../pages/CVBuilder";
+import {
+    parseDescription,
+    parseProjectDetails,
+    parseActivityDetails,
+    dateConverter,
+} from "../helpers/helpers";
+import { fontPicker } from '../helpers/helpers';
+import {
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+} from "@mui/material";
+import CircularProgress from '@mui/material/CircularProgress';
 
-        <section>
-            <h2 class="section-title text-xl">About Me</h2>
-            <p class="text-gray-700">Passionate web developer with over 5 years of experience in building interactive and responsive websites. Adept at collaborating with designers and developers to create user-centered solutions. Excels in problem-solving and is committed to continuous learning and improvement.</p>
-        </section>
+function Template4({ save, load, loading, draftLoading }) {
+    const targetRef = useRef();
 
-        <section class="mt-8">
-            <h2 class="section-title text-xl">Skills</h2>
-            <div class="space-y-4">
-                <div>
-                    <h3 class="font-semibold">HTML & CSS</h3>
-                    <div class="skill-bar">
-                        <div class="skill-fill" style="width: 90%;"></div>
-                    </div>
+    const {
+        personalInformation,
+        summary,
+        employment,
+        education,
+        socials,
+        skills,
+        project,
+        extraCurricular,
+        certification,
+        languages,
+        hobbies,
+        reference,
+        skillExpLevel,
+        langLevel,
+    } = useContext(DataContext);
+
+    const [
+        {
+            firstname,
+            lastname,
+            email,
+            phone,
+            country,
+            city,
+            occupation,
+            postalcode,
+        } = {},
+    ] = personalInformation?.[0] || [{}];
+    const [selectedFont, setSelectedFont] = useState("Inter, sans-serif");
+
+    const handleFontChange = (font) => {
+        setSelectedFont(font);
+    };
+
+    const [{ summary: about } = {}] = summary?.[0] || [{}];
+    const [showExpLevel] = skillExpLevel || [];
+    const [showLangLevel] = langLevel || [];
+
+    const hasData = (items, fields = []) =>
+        items?.[0]?.some((item) => fields.some((field) => item?.[field]));
+
+    const SectionTitle = ({ children }) => (
+        <h2 className="mt-6 border-b border-gray-300 pb-1 text-[15px] font-bold uppercase tracking-wide text-gray-900">
+            {children}
+        </h2>
+    );
+
+    return (
+        <div className="template-preview mx-auto scale-75 sm:scale-75 md:scale-75 lg:scale-75 xl:scale-75">
+            <div
+                ref={targetRef}
+                id="template-wrapper"
+                className="mx-auto h-screen overflow-auto bg-white print:h-auto print:min-h-0 print:overflow-visible print:shadow-none"
+            >
+                <main style={{ fontFamily: selectedFont }}  className="mx-auto min-h-[1120px] w-full max-w-[900px] bg-white px-10 py-10 font-serif text-[13px] leading-[1.45] text-gray-800">
+                    {/* Header */}
+                    <header className="text-center">
+                        <h1 className="text-[30px] font-bold uppercase tracking-wide text-gray-950">
+                            {firstname || lastname
+                                ? `${firstname || ""} ${lastname || ""}`.trim()
+                                : "Your Name"}
+                        </h1>
+
+                        {occupation && (
+                            <p className="mt-1 text-[15px] font-medium text-gray-700">
+                                {occupation}
+                            </p>
+                        )}
+
+                        <div className="mt-2 flex flex-wrap justify-center gap-x-2 gap-y-1 text-[12px] text-gray-700">
+                            {email && <span>{email}</span>}
+                            {email && phone && <span>|</span>}
+                            {phone && <span>{phone}</span>}
+
+                            {(city || country || postalcode) && (
+                                <>
+                                    {(email || phone) && <span>|</span>}
+                                    <span>
+                                        {[city, country, postalcode].filter(Boolean).join(", ")}
+                                    </span>
+                                </>
+                            )}
+                        </div>
+
+                        {socials?.[0]?.some((social) => social.label || social.linkurl) && (
+                            <div className="mt-1 flex flex-wrap justify-center gap-x-2 gap-y-1 text-[12px] text-gray-700">
+                                {socials[0]
+                                    .filter((social) => social.label || social.linkurl)
+                                    .map((social, index) => (
+                                        <React.Fragment key={index}>
+                                            {index > 0 && <span>|</span>}
+                                            <a
+                                                href={social.linkurl || "#"}
+                                                target={social.linkurl ? "_blank" : undefined}
+                                                rel="noreferrer"
+                                                className="break-all hover:underline"
+                                            >
+                                                {social.label || social.linkurl}
+                                            </a>
+                                        </React.Fragment>
+                                    ))}
+                            </div>
+                        )}
+                    </header>
+
+                    {/* Summary */}
+                    {about && (
+                        <section>
+                            <SectionTitle>Professional Summary</SectionTitle>
+                            <p className="mt-2 break-words text-justify">{about}</p>
+                        </section>
+                    )}
+
+                    {/* Skills */}
+                    {hasData(skills, ["skill", "level"]) && (
+                        <section>
+                            <SectionTitle>Skills</SectionTitle>
+
+                            <div className="mt-2 flex flex-wrap gap-x-2 gap-y-1">
+                                {skills[0]
+                                    .filter((item) => item.skill)
+                                    .map((item, index) => (
+                                        <span key={index}>
+                                            {item.skill}
+                                            {showExpLevel && item.level ? ` (${item.level})` : ""}
+                                            {index !==
+                                                skills[0].filter((item) => item.skill).length - 1 && ","}
+                                        </span>
+                                    ))}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Experience */}
+                    {hasData(employment, ["employer", "jobtitle", "description"]) && (
+                        <section>
+                            <SectionTitle>Professional Experience</SectionTitle>
+
+                            <div className="mt-2 space-y-4">
+                                {employment[0]
+                                    .filter(
+                                        (job) => job.employer || job.jobtitle || job.description
+                                    )
+                                    .map((job, index) => (
+                                        <div key={index}>
+                                            {(job.jobtitle || job.employer) && (
+                                                <div className="flex flex-wrap justify-between gap-2">
+                                                    <h3 className="font-bold text-gray-950">
+                                                        {[job.jobtitle, job.employer]
+                                                            .filter(Boolean)
+                                                            .join(" | ")}
+                                                    </h3>
+
+                                                    {(job.startdate || job.enddate) && (
+                                                        <p className="font-medium text-gray-700">
+                                                            {dateConverter(
+                                                                job.startdate,
+                                                                job.enddate,
+                                                                job.ongoing
+                                                            )}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {job.description &&
+                                                job.description !== "<p><br></p>" && (
+                                                    <ul className="mt-1 list-disc space-y-1 pl-5">
+                                                        {parseDescription(job.description)}
+                                                    </ul>
+                                                )}
+                                        </div>
+                                    ))}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Education */}
+                    {hasData(education, ["degree", "institution", "institutioncity"]) && (
+                        <section>
+                            <SectionTitle>Education</SectionTitle>
+
+                            <div className="mt-2 space-y-3">
+                                {education[0]
+                                    .filter(
+                                        (edc) =>
+                                            edc.degree ||
+                                            edc.institution ||
+                                            edc.institutioncity
+                                    )
+                                    .map((edc, index) => (
+                                        <div key={index}>
+                                            <div className="flex flex-wrap justify-between gap-2">
+                                                <h3 className="font-bold text-gray-950">
+                                                    {edc.degree}
+                                                </h3>
+
+                                                {(edc.startdate || edc.enddate) && (
+                                                    <p className="font-medium text-gray-700">
+                                                        {edc.startdate}
+                                                        {edc.startdate && edc.enddate ? " - " : ""}
+                                                        {edc.ongoing
+                                                            ? "Present"
+                                                            : edc.enddate || ""}
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            {(edc.institution || edc.institutioncity) && (
+                                                <p>
+                                                    {[edc.institution, edc.institutioncity]
+                                                        .filter(Boolean)
+                                                        .join(", ")}
+                                                </p>
+                                            )}
+                                        </div>
+                                    ))}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Projects */}
+                    {hasData(project, ["projecttitle", "description"]) && (
+                        <section>
+                            <SectionTitle>Projects</SectionTitle>
+
+                            <div className="mt-2 space-y-4">
+                                {project[0]
+                                    .filter((pro) => pro.projecttitle || pro.description)
+                                    .map((pro, index) => (
+                                        <div key={index}>
+                                            <div className="flex flex-wrap justify-between gap-2">
+                                                {pro.projecttitle && (
+                                                    <h3 className="font-bold text-gray-950">
+                                                        {pro.projecttitle}
+                                                    </h3>
+                                                )}
+
+                                                {(pro.startdate || pro.enddate) && (
+                                                    <p className="font-medium text-gray-700">
+                                                        {dateConverter(
+                                                            pro.startdate,
+                                                            pro.enddate,
+                                                            pro.ongoing
+                                                        )}
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            {(pro.liveurl || pro.githuburl) && (
+                                                <div className="mt-1 flex flex-wrap gap-x-2 text-[12px]">
+                                                    {pro.liveurl && (
+                                                        <a
+                                                            href={pro.liveurl}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="break-all hover:underline"
+                                                        >
+                                                            Live: {pro.liveurl}
+                                                        </a>
+                                                    )}
+
+                                                    {pro.githuburl && (
+                                                        <a
+                                                            href={pro.githuburl}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="break-all hover:underline"
+                                                        >
+                                                            GitHub: {pro.githuburl}
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {Array.isArray(pro.technologies) &&
+                                                pro.technologies.length > 0 && (
+                                                    <p className="mt-1">
+                                                        <span className="font-bold">
+                                                            Technologies:
+                                                        </span>{" "}
+                                                        {pro.technologies.join(", ")}
+                                                    </p>
+                                                )}
+
+                                            {pro.description && (
+                                                <ul className="mt-1 list-disc space-y-1 pl-5">
+                                                    {parseProjectDetails(pro.description)}
+                                                </ul>
+                                            )}
+                                        </div>
+                                    ))}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Certifications */}
+                    {hasData(certification, [
+                        "title",
+                        "organization",
+                        "issueDate",
+                        "credentialUrl",
+                        "description",
+                    ]) && (
+                            <section>
+                                <SectionTitle>Certifications</SectionTitle>
+
+                                <div className="mt-2 space-y-3">
+                                    {certification[0]
+                                        .filter(
+                                            (cert) =>
+                                                cert.title ||
+                                                cert.organization ||
+                                                cert.issueDate ||
+                                                cert.credentialUrl ||
+                                                cert.description
+                                        )
+                                        .map((cert, index) => (
+                                            <div key={index}>
+                                                <div className="flex flex-wrap justify-between gap-2">
+                                                    {cert.title && (
+                                                        <h3 className="font-bold text-gray-950">
+                                                            {cert.title}
+                                                        </h3>
+                                                    )}
+
+                                                    {cert.issueDate && (
+                                                        <p className="font-medium text-gray-700">
+                                                            {cert.issueDate}
+                                                        </p>
+                                                    )}
+                                                </div>
+
+                                                {cert.organization && <p>{cert.organization}</p>}
+
+                                                {cert.credentialUrl && (
+                                                    <a
+                                                        href={cert.credentialUrl}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="break-all text-gray-700 hover:underline"
+                                                    >
+                                                        {cert.credentialUrl}
+                                                    </a>
+                                                )}
+
+                                                {cert.description && (
+                                                    <p className="mt-1 break-words">
+                                                        {cert.description}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        ))}
+                                </div>
+                            </section>
+                        )}
+
+
+
+                    {/* Extra Curricular */}
+                    {hasData(extraCurricular, [
+                        "role",
+                        "title",
+                        "institution",
+                        "description",
+                    ]) && (
+                            <section>
+                                <SectionTitle>Extra Curricular Activities</SectionTitle>
+
+                                <div className="mt-2 space-y-4">
+                                    {extraCurricular[0]
+                                        .filter(
+                                            (item) =>
+                                                item.role ||
+                                                item.title ||
+                                                item.institution ||
+                                                item.description
+                                        )
+                                        .map((item, index) => (
+                                            <div key={index}>
+                                                <div className="flex flex-wrap justify-between gap-2">
+                                                    <h3 className="font-bold text-gray-950">
+                                                        {[item.role, item.title]
+                                                            .filter(Boolean)
+                                                            .join(" - ")}
+                                                    </h3>
+
+                                                    {(item.startdate || item.enddate) && (
+                                                        <p className="font-medium text-gray-700">
+                                                            {dateConverter(
+                                                                item.startdate,
+                                                                item.enddate,
+                                                                item.ongoing
+                                                            )}
+                                                        </p>
+                                                    )}
+                                                </div>
+
+                                                {item.institution && <p>{item.institution}</p>}
+
+                                                {item.description && (
+                                                    <ul className="mt-1 list-disc space-y-1 pl-5">
+                                                        {parseActivityDetails(item.description)}
+                                                    </ul>
+                                                )}
+                                            </div>
+                                        ))}
+                                </div>
+                            </section>
+                        )}
+
+                    {/* Languages */}
+                    {hasData(languages, ["name", "level"]) && (
+                        <section>
+                            <SectionTitle>Languages</SectionTitle>
+
+                            <div className="mt-2 flex flex-wrap gap-x-2 gap-y-1">
+                                {languages[0]
+                                    .filter((language) => language.name)
+                                    .map((language, index) => (
+                                        <span key={index}>
+                                            {language.name}
+                                            {!showLangLevel && language.level
+                                                ? ` (${language.level})`
+                                                : ""}
+                                            {index !==
+                                                languages[0].filter((language) => language.name)
+                                                    .length -
+                                                1 && ","}
+                                        </span>
+                                    ))}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Hobbies */}
+                    {hobbies?.[0]?.length > 0 && (
+                        <section>
+                            <SectionTitle>Hobbies & Interests</SectionTitle>
+
+                            <div className="mt-2 flex flex-wrap gap-x-2 gap-y-1">
+                                {hobbies[0]
+                                    .filter((item) => item?.trim())
+                                    .map((item, index) => (
+                                        <span key={index}>
+                                            {item.trim()}
+                                            {index !==
+                                                hobbies[0].filter((item) => item?.trim()).length -
+                                                1 && ","}
+                                        </span>
+                                    ))}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* References */}
+                    {hasData(reference, [
+                        "referrername",
+                        "position",
+                        "organization",
+                        "email",
+                        "phone",
+                    ]) && (
+                            <section>
+                                <SectionTitle>References</SectionTitle>
+
+                                <div className="mt-2 space-y-3">
+                                    {reference[0]
+                                        .filter(
+                                            (ref) =>
+                                                ref.referrername ||
+                                                ref.position ||
+                                                ref.organization ||
+                                                ref.email ||
+                                                ref.phone
+                                        )
+                                        .map((ref, index) => (
+                                            <div key={index}>
+                                                <h3 className="font-bold text-gray-950">
+                                                    {ref.referrername}
+                                                </h3>
+
+                                                {(ref.position || ref.organization) && (
+                                                    <p>
+                                                        {[ref.position, ref.organization]
+                                                            .filter(Boolean)
+                                                            .join(" | ")}
+                                                    </p>
+                                                )}
+
+                                                <div className="text-gray-700">
+                                                    {ref.address && <p>{ref.address}</p>}
+                                                    {ref.email && <p>{ref.email}</p>}
+                                                    {ref.phone && <p>{ref.phone}</p>}
+                                                </div>
+                                            </div>
+                                        ))}
+                                </div>
+                            </section>
+                        )}
+                </main>
+            </div>
+
+            <div className="flex w-full gap-2 py-5">
+                <div className="flex items-center gap-2">
+                    <FormControl size="small" sx={{ minWidth: 180, backgroundColor: "white" }}>
+                        <InputLabel id="font-picker-label">Font Style</InputLabel>
+
+                        <Select
+                            labelId="font-picker-label"
+                            id="font-picker"
+                            value={selectedFont}
+                            label="Font Style"
+                            onChange={(e) => setSelectedFont(e.target.value)}
+                        >
+                            {fontPicker.map((font) => (
+                                <MenuItem
+                                    key={font.value}
+                                    value={font.value}
+                                    sx={{ fontFamily: font.value }}
+                                >
+                                    {font.label}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
                 </div>
-                <div>
-                    <h3 class="font-semibold">JavaScript</h3>
-                    <div class="skill-bar">
-                        <div class="skill-fill" style="width: 80%;"></div>
-                    </div>
-                </div>
-                <div>
-                    <h3 class="font-semibold">React</h3>
-                    <div class="skill-bar">
-                        <div class="skill-fill" style="width: 85%;"></div>
-                    </div>
-                </div>
-                <div>
-                    <h3 class="font-semibold">UI/UX Design</h3>
-                    <div class="skill-bar">
-                        <div class="skill-fill" style="width: 75%;"></div>
-                    </div>
+                <div className="ml-auto flex gap-4 items-center">
+                    <button onClick={load} className='bg-gray-600 transition hover:bg-slate-700 text-white p-3 rounded-md py-3 text-sm'>{draftLoading ? <CircularProgress style={{ color: 'white' }} size="14px" aria-label="Loading…" /> : null} <span className='ml-2'>{draftLoading ? "loading" : "Load Draft"}</span> </button>
+                    <button onClick={save} className='bg-green-600 flex items-center transition hover:bg-slate-700 text-white p-3 rounded-md py-3 text-sm'> {loading ? <CircularProgress style={{ color: 'white' }} size="14px" aria-label="Loading…" /> : null} <span className='ml-2'>{loading ? "saving" : "Save Draft"}</span></button>
+                    <ReactToPrint
+                        trigger={() => (
+                            <button className="rounded-md bg-slate-800 px-4 py-3 text-sm text-white transition hover:bg-slate-700">
+                                Print and Download
+                            </button>
+                        )}
+                        content={() => targetRef.current}
+                    />
                 </div>
             </div>
-        </section>
 
-        <section class="mt-8">
-            <h2 class="section-title text-xl">Experience</h2>
-            <div class="space-y-4">
-                <div>
-                    <h3 class="font-semibold">Senior Web Developer at XYZ Corp</h3>
-                    <p class="text-gray-600">Jan 2020 - Present</p>
-                    <ul class="list-disc ml-6 mt-2 text-gray-700">
-                        <li>Developed and maintained company websites and applications.</li>
-                        <li>Collaborated with cross-functional teams to enhance user experience.</li>
-                        <li>Implemented responsive designs and optimized performance.</li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="font-semibold">Front-End Developer at ABC Inc</h3>
-                    <p class="text-gray-600">Jun 2017 - Dec 2019</p>
-                    <ul class="list-disc ml-6 mt-2 text-gray-700">
-                        <li>Built interactive user interfaces with HTML, CSS, and JavaScript.</li>
-                        <li>Worked closely with designers to create visually appealing designs.</li>
-                        <li>Ensured cross-browser compatibility and responsiveness.</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
+        </div>
+    );
+}
 
-        <section class="mt-8">
-            <h2 class="section-title text-xl">Education</h2>
-            <div>
-                <h3 class="font-semibold">Bachelor of Science in Computer Science</h3>
-                <p class="text-gray-600">University of Somewhere</p>
-                <p class="text-gray-500">Graduated: May 2017</p>
-            </div>
-        </section>
-    </div>
-</body> */}
+export default Template4;

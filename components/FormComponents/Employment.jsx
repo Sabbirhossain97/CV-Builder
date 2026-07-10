@@ -91,70 +91,111 @@ export default function Employment() {
     const clone = [...employmentDetails];
     const currentEmployment = { ...clone[inputKey] };
 
-    if (name === "enddate" && currentEmployment.startdate) {
-      if (value < currentEmployment.startdate) {
-        showAlert("End date cannot be earlier than start date.");
-        return;
-      }
+    if (
+      name === "enddate" &&
+      currentEmployment.startdate &&
+      value < currentEmployment.startdate
+    ) {
+      showAlert("End date cannot be earlier than start date.");
+      return;
     }
 
-    if (name === "startdate" && currentEmployment.enddate) {
-      if (value > currentEmployment.enddate) {
-        showAlert("Start date cannot be later than end date.");
-        return;
-      }
+    if (
+      name === "startdate" &&
+      currentEmployment.enddate &&
+      !currentEmployment.ongoing &&
+      value > currentEmployment.enddate
+    ) {
+      showAlert("Start date cannot be later than end date.");
+      return;
     }
 
-    currentEmployment[name] = type === "checkbox" ? checked : value;
+    currentEmployment[name] =
+      type === "checkbox" ? checked : value;
 
-    if (name === "ongoing" && checked) {
-      currentEmployment.enddate = "";
+    if (name === "ongoing") {
+      currentEmployment.ongoing = checked;
+
+      if (checked) {
+        currentEmployment.enddate = "";
+      }
     }
 
     clone[inputKey] = currentEmployment;
-    setEmploymentDetails(clone);
 
-    calculateProfileCompleteness();
+    setEmploymentDetails(clone);
+    calculateProfileCompleteness(clone);
   };
 
   const handleDescriptionChange = (index, value) => {
+    if (
+      value.startsWith("<p>") &&
+      value.endsWith("</p>") &&
+      value !== "<p><br></p>"
+    ) {
+      setOpenModal(true);
+      setDisabledEditor(true);
+      return;
+    }
 
-    if ((value.startsWith("<p>") && value.endsWith("</p>") && value !== "<p><br></p>")) {
-      setOpenModal(true)
-      setDisabledEditor(true)
-    }
-    else {
-      setDisabledEditor(false)
-      const updatedEmploymentDetails = [...employmentDetails];
-      updatedEmploymentDetails[index].description = value;
-      setEmploymentDetails(updatedEmploymentDetails);
-      calculateProfileCompleteness();
-    }
+    setDisabledEditor(false);
+
+    const updatedEmploymentDetails = [...employmentDetails];
+
+    updatedEmploymentDetails[index] = {
+      ...updatedEmploymentDetails[index],
+      description: value,
+    };
+
+    setEmploymentDetails(updatedEmploymentDetails);
+    calculateProfileCompleteness(updatedEmploymentDetails);
   };
 
-  const calculateProfileCompleteness = () => {
-    const firstEntry = employmentDetails[0];
-    if (firstEntry) {
+  const isDescriptionCompleted = (description = "") => {
+    const plainText = description
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .trim();
 
-      const allfieldsCompleted = Object.values(firstEntry).every(field => field !== "")
+    return plainText.length > 0;
+  };
 
-      if (allfieldsCompleted) {
-        if (!completedSections.sections.includes("Experience")) {
-          setCompletedSections(prevState => ({
-            ...prevState,
-            sections: [...prevState.sections, "Experience"]
-          }));
-        }
-      } else {
-        if (completedSections.sections.includes("Experience")) {
-          setCompletedSections(prevState => ({
-            ...prevState,
-            sections: prevState.sections.filter(section => section !== "Experience")
-          }));
-        }
+  const calculateProfileCompleteness = (details) => {
+    const firstEntry = details[0];
+
+    if (!firstEntry) return;
+
+    const allFieldsCompleted =
+      firstEntry.jobtitle.trim() !== "" &&
+      firstEntry.employer.trim() !== "" &&
+      firstEntry.startdate !== "" &&
+      firstEntry.city.trim() !== "" &&
+      isDescriptionCompleted(firstEntry.description) &&
+      (firstEntry.ongoing || firstEntry.enddate !== "");
+
+    setCompletedSections((prevState) => {
+      const hasExperience =
+        prevState.sections.includes("Experience");
+
+      if (allFieldsCompleted && !hasExperience) {
+        return {
+          ...prevState,
+          sections: [...prevState.sections, "Experience"],
+        };
       }
-    }
-  }
+
+      if (!allFieldsCompleted && hasExperience) {
+        return {
+          ...prevState,
+          sections: prevState.sections.filter(
+            (section) => section !== "Experience"
+          ),
+        };
+      }
+
+      return prevState;
+    });
+  };
 
   return (
     <Box >
@@ -236,7 +277,7 @@ export default function Employment() {
                           borderRadius: "5px",
                         }}
                         InputProps={{
-                          disableUnderline: true,
+                          disableunderline: true,
                         }}
                         onChange={(e) => handleInputChange(e, key)}
                       />
@@ -253,7 +294,7 @@ export default function Employment() {
                           borderRadius: "5px",
                         }}
                         InputProps={{
-                          disableUnderline: true,
+                          disableunderline: true,
                         }}
                         onChange={(e) => handleInputChange(e, key)}
                       />
@@ -270,7 +311,7 @@ export default function Employment() {
                           width: "50%",
                         }}
                         InputProps={{
-                          disableUnderline: true,
+                          disableunderline: true,
                         }}
                         InputLabelProps={{ shrink: true }}
                         onChange={(e) => handleInputChange(e, key)}
@@ -289,7 +330,7 @@ export default function Employment() {
                             width: "100%",
                           }}
                           InputProps={{
-                            disableUnderline: true,
+                            disableunderline: true,
                           }}
                           InputLabelProps={{ shrink: true }}
                           onChange={(e) => handleInputChange(e, key)}
@@ -321,7 +362,7 @@ export default function Employment() {
                           borderRadius: "5px",
                         }}
                         InputProps={{
-                          disableUnderline: true,
+                          disableunderline: true,
                         }}
                         onChange={(e) => handleInputChange(e, key)}
                       />

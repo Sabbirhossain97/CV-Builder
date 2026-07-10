@@ -10,19 +10,32 @@ import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import Image from 'next/image';
 import Template2 from './Template2';
+import { fontPicker } from '../helpers/helpers';
+import {
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+} from "@mui/material";
+import CircularProgress from '@mui/material/CircularProgress';
 
-function Template() {
+function Template({ save, load, loading, draftLoading }) {
     const targetRef = useRef();
     const [colors, setColors] = useState("");
-    const { imageUrls, personalInformation, summary, employment, education, socials, skills, project, extraCurricular, languages, hobbies, reference, skillExpLevel, langLevel, previewTemplate } = useContext(DataContext);
+    const { imageUrls, personalInformation, summary, employment, education, socials, skills, project, extraCurricular, certification, languages, hobbies, reference, skillExpLevel, langLevel, previewTemplate } = useContext(DataContext);
     const [{ firstname, lastname, email, phone, country, city, occupation, postalcode }] = personalInformation[0]
     const [picture] = imageUrls[0];
     const [{ summary: about }] = summary[0];
     const [showExpLevel] = skillExpLevel;
     const [showLangLevel] = langLevel;
-    const {interests: test} = hobbies[0];
+    const { interests: test } = hobbies[0];
     const [showTemplate, setShowTemplate] = previewTemplate;
     const [tabValue, setTabValue] = React.useState('1');
+    const [selectedFont, setSelectedFont] = useState("Inter, sans-serif");
+
+    const handleFontChange = (font) => {
+        setSelectedFont(font);
+    };
 
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
@@ -36,6 +49,7 @@ function Template() {
         <div className="template-preview mx-auto scale-75 sm:scale-75 md:scale-75 lg:scale-75 xl:scale-75">
             <div ref={targetRef}
                 id="template-wrapper"
+                style={{ fontFamily: selectedFont }}
                 className="bg-white shadow-lg h-screen overflow-auto mx-auto print:h-auto print:min-h-0 print:overflow-visible print:shadow-none">
                 <div className={`flex w-full bg-slate-800 sm:px-2 gap-10`} style={{ background: colors }}>
                     <div className="left-5 top-10 h-40 w-40 overflow-hidden sm:relative sm:rounded-full sm:p-0">
@@ -68,10 +82,10 @@ function Template() {
                                     {
                                         email &&
                                         <>
-                                            <div class="mr-2">
+                                            <div className="mr-2">
                                                 <Email />
                                             </div>
-                                            <div class="flex-grow" style={{ overflowWrap: 'break-word' }}>
+                                            <div className="flex-grow" style={{ overflowWrap: 'break-word' }}>
                                                 {email}
                                             </div>
                                         </>
@@ -294,6 +308,68 @@ function Template() {
                             }
 
                             {
+                                certification?.[0]?.some((entry) =>
+                                    Object.values(entry).some((item) => item !== "")
+                                ) && (
+                                    <div className="py-3">
+                                        <h2
+                                            className="font-poppins text-top-color text-lg font-bold"
+                                            style={{ color: colors }}
+                                        >
+                                            Certifications
+                                        </h2>
+                                        <div className="border-top-color my-3 w-20 border-2"></div>
+
+                                        <div className="flex flex-col space-y-3">
+                                            {certification?.[0]
+                                                ?.filter(
+                                                    (cert) =>
+                                                        cert.title ||
+                                                        cert.organization ||
+                                                        cert.issueDate ||
+                                                        cert.credentialUrl ||
+                                                        cert.description
+                                                )
+                                                .map((cert, index) => (
+                                                    <div key={index} className="flex flex-col">
+                                                        {cert.title && (
+                                                            <p className="text-lg font-bold text-gray-700">
+                                                                {cert.title}
+                                                            </p>
+                                                        )}
+
+                                                        {(cert.organization || cert.issueDate) && (
+                                                            <p className="text-sm font-semibold text-gray-700">
+                                                                {cert.organization}
+                                                                {cert.organization && cert.issueDate ? " | " : ""}
+                                                                {cert.issueDate}
+                                                            </p>
+                                                        )}
+
+                                                        {cert.credentialUrl && (
+                                                            <a
+                                                                href={cert.credentialUrl}
+                                                                target="_blank"
+                                                                rel="noreferrer"
+                                                                className="break-all text-sm font-medium text-gray-600 hover:text-blue-700"
+                                                            >
+                                                                View Credential
+                                                            </a>
+                                                        )}
+
+                                                        {cert.description && (
+                                                            <p className="mt-1 break-words text-sm text-gray-700">
+                                                                {cert.description}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+                            {
                                 extraCurricular?.[0].some((entry) => Object.values(entry).some((item) => item !== "")) && <div className="py-3">
                                     <h2 className="font-poppins text-top-color text-lg font-bold" style={{ color: colors }}>Extra Currricular Activites</h2>
                                     <div className="border-top-color my-3 w-20 border-2"></div>
@@ -302,7 +378,7 @@ function Template() {
                                         {extraCurricular?.[0] && extraCurricular?.[0].map((item, index) => (
                                             <div key={index} className="flex flex-col">
                                                 {item.role && item.title && item.institution ? <p className="text-lg font-bold text-gray-700">{item.role} - {item.title}</p> : null}
-                                                {item.institution ? <p className="text-[16px] font-medium text-gray-700">{item.institution}</p> : null }
+                                                {item.institution ? <p className="text-[16px] font-medium text-gray-700">{item.institution}</p> : null}
                                                 {item.startdate && item.enddate ? <p className="text-sm font-bold text-gray-700">
                                                     {dateConverter(item.startdate, item.enddate)}
                                                 </p> : null}
@@ -342,11 +418,85 @@ function Template() {
                     </div>
                 </div>
             </div>
+            {/* color and font style options */}
             <div className=' w-full flex gap-2 py-5'>
-                {colorPicker.map((color, index) => (
-                    <div key={index} onClick={() => handleColorChange(color.name)} className={`cursor-pointer border transition duration-300 hover:border-2 w-8 h-10 rounded-md `} style={{ background: color.name }}></div>
-                ))}
-                <div className='w-3/4 flex justify-end custom-end:justify-end'>
+                <div className="flex items-center gap-2">
+                    <FormControl size="small" sx={{ minWidth: 160, backgroundColor: "white" }}>
+                        <InputLabel id="color-picker-label">Color</InputLabel>
+
+                        <Select
+                            labelId="color-picker-label"
+                            id="color-picker"
+                            value={colors || "#1e293b"}
+                            label="Color"
+                            onChange={(e) => handleColorChange(e.target.value)}
+                            renderValue={(selected) => {
+                                const selectedColor = colorPicker.find(
+                                    (color) => color.name === selected
+                                );
+
+                                return (
+                                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                        <Box
+                                            sx={{
+                                                width: 14,
+                                                height: 14,
+                                                borderRadius: "50%",
+                                                backgroundColor: selectedColor?.name,
+                                                border: "1px solid #ccc",
+                                            }}
+                                        />
+                                        {selectedColor?.label}
+                                    </Box>
+                                );
+                            }}
+                        >
+                            {colorPicker.map((color) => (
+                                <MenuItem key={color.name} value={color.name}>
+                                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                        <Box
+                                            sx={{
+                                                width: 14,
+                                                height: 14,
+                                                borderRadius: "50%",
+                                                backgroundColor: color.name,
+                                                border: "1px solid #ccc",
+                                            }}
+                                        />
+                                        {color.label}
+                                    </Box>
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </div>
+                <div className="flex items-center gap-2">
+                    <FormControl size="small" sx={{ minWidth: 180, backgroundColor: "white" }}>
+                        <InputLabel id="font-picker-label">Font Style</InputLabel>
+
+                        <Select
+                            labelId="font-picker-label"
+                            id="font-picker"
+                            value={selectedFont}
+                            label="Font Style"
+                            onChange={(e) => setSelectedFont(e.target.value)}
+                        >
+                            {fontPicker.map((font) => (
+                                <MenuItem
+                                    key={font.value}
+                                    value={font.value}
+                                    sx={{ fontFamily: font.value }}
+                                >
+                                    {font.label}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </div>
+                {/* save and print option */}
+                <div className='w-3/4 flex gap-4 justify-end custom-end:justify-end'>
+                    <button onClick={load} className='bg-gray-600 transition hover:bg-slate-700 text-white p-3 rounded-md py-3 text-sm'>{draftLoading ? <CircularProgress style={{ color: 'white' }} size="14px" aria-label="Loading…" /> : null} <span className='ml-2'>{draftLoading ? "loading" : "Load Draft"}</span> </button>
+                    <button onClick={save} className='bg-green-600 flex items-center transition hover:bg-slate-700 text-white p-3 rounded-md py-3 text-sm'> {loading ? <CircularProgress style={{ color: 'white' }} size="14px" aria-label="Loading…" /> : null } <span className='ml-2'>{loading ? "saving" : "Save Draft" }</span></button>
                     <ReactToPrint
                         trigger={() =>
                             <button className='bg-slate-800 transition hover:bg-slate-700 text-white p-3 rounded-md py-3 text-sm'>Print and Download</button>

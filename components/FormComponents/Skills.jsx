@@ -69,7 +69,7 @@ function SortableSkillItem({
       ref={setNodeRef}
       style={style}
       container
-      columns={16}
+      columns={15}
       sx={{
         display: "flex",
         alignItems: "center",
@@ -77,7 +77,7 @@ function SortableSkillItem({
       }}
     >
       {/* Drag handle */}
-      <Grid item xs="auto">
+      <Grid item xs={1}>
         <Box
           ref={setActivatorNodeRef}
           {...attributes}
@@ -100,7 +100,7 @@ function SortableSkillItem({
         </Box>
       </Grid>
 
-      <Grid item xs sx={{ minWidth: 0 }}>
+      <Grid item xs={13}  sx={{ minWidth: 0 }}>
         <Accordion
           expanded={expanded === skills.id}
           onChange={handleChange(skills.id)}
@@ -263,7 +263,9 @@ export default function Skills() {
     const firstEntry = skillDetails[0];
 
     if (firstEntry) {
-      const allfieldsCompleted = Object.values(firstEntry).every(field => field !== "")
+      const allfieldsCompleted = 
+        firstEntry.id !== "" &&
+        firstEntry.skill !== "" 
 
       if (allfieldsCompleted) {
         if (!completedSections.sections.includes("Skills")) {

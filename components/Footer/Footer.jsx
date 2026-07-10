@@ -8,6 +8,7 @@ export default function Footer() {
             style={{
                 display: "flex",
                 justifyContent: "center",
+                flexDirection: 'column',
                 alignItems: "center",
                 width: "100%",
                 height: "100px",
@@ -22,7 +23,12 @@ export default function Footer() {
             <Typography
                 style={{ textAlign: "center", color: "white", fontWeight: "600" }}
             >
-                &copy; 2023 CV Builder. All rights reserved
+                &copy; 2026 CV Builder. All rights reserved
+            </Typography>
+            <Typography
+                style={{ textAlign: "center", color: "white", fontWeight: "600" }}
+            >
+                Developed by <a className='underline' target='_blank' href="https://github.com/Sabbirhossain97">Sabbir Hossain</a>
             </Typography>
         </Box>
     )
