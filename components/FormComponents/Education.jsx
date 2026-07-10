@@ -64,7 +64,7 @@ export default function Education() {
   const currentYear = new Date().getFullYear();
 
   const isValidYear = (year) => {
-    if (!year) return true; 
+    if (!year) return true;
 
     return (
       /^\d{4}$/.test(year) &&
@@ -90,7 +90,10 @@ export default function Education() {
         const numericYear = Number(value);
 
         if (numericYear < MIN_YEAR || numericYear > currentYear) {
-          showAlert(`Please enter a valid year between ${MIN_YEAR} and ${currentYear}.`);
+          setAlertMessage(
+            `Please enter a valid year between ${MIN_YEAR} and ${currentYear}.`
+          );
+          setAlertOpen(true);
           return;
         }
       }
@@ -110,6 +113,7 @@ export default function Education() {
         name === "startdate" &&
         value.length === 4 &&
         currentEducation.enddate?.length === 4 &&
+        !currentEducation.ongoing &&
         Number(value) > Number(currentEducation.enddate)
       ) {
         setAlertMessage("Start year cannot be later than end year.");
@@ -118,44 +122,70 @@ export default function Education() {
       }
     }
 
-    currentEducation[name] = type === "checkbox" ? checked : value;
+    currentEducation[name] =
+      type === "checkbox" ? checked : value;
+
+    if (name === "ongoing") {
+      currentEducation.ongoing = checked;
+
+      if (checked) {
+        currentEducation.enddate = "";
+      }
+    }
 
     if (name === "startdate" && Number(value) === currentYear) {
       currentEducation.ongoing = true;
       currentEducation.enddate = "";
     }
 
-    if (name === "ongoing" && checked) {
-      currentEducation.enddate = "";
-    }
-
     clone[inputKey] = currentEducation;
+
     setEducationDetails(clone);
+    calculateProfileCompleteness(clone);
   };
 
-  const calculateProfileCompleteness = () => {
-    const firstEntry = educationDetails[0];
+  const calculateProfileCompleteness = (details) => {
+    const firstEntry = details[0];
 
-    if (firstEntry) {
-      const allfieldsCompleted = Object.values(firstEntry).every(field => field !== "")
-      if (allfieldsCompleted) {
-        if (!completedSections.sections.includes("Education")) {
-          setCompletedSections(prevState => ({
-            ...prevState,
-            sections: [...prevState.sections, "Education"]
-          }));
-        }
-      } else {
-        if (completedSections.sections.includes("Education")) {
-          setCompletedSections(prevState => ({
-            ...prevState,
-            sections: prevState.sections.filter(section => section !== "Education")
-          }));
-        }
+    if (!firstEntry) return;
+
+    const allFieldsCompleted =
+      firstEntry.degree.trim() !== "" &&
+      firstEntry.institution.trim() !== "" &&
+      firstEntry.institutioncity.trim() !== "" &&
+      firstEntry.startdate !== "" &&
+      isValidYear(firstEntry.startdate) &&
+      (
+        firstEntry.ongoing ||
+        (
+          firstEntry.enddate !== "" &&
+          isValidYear(firstEntry.enddate)
+        )
+      );
+
+    setCompletedSections((prevState) => {
+      const hasEducation =
+        prevState.sections.includes("Education");
+
+      if (allFieldsCompleted && !hasEducation) {
+        return {
+          ...prevState,
+          sections: [...prevState.sections, "Education"],
+        };
       }
-    }
 
-  }
+      if (!allFieldsCompleted && hasEducation) {
+        return {
+          ...prevState,
+          sections: prevState.sections.filter(
+            (section) => section !== "Education"
+          ),
+        };
+      }
+
+      return prevState;
+    });
+  };
 
   return (
     <Box >
@@ -212,7 +242,7 @@ export default function Education() {
                           borderRadius: "5px",
                         }}
                         InputProps={{
-                          disableUnderline: true,
+                          disableunderline: true,
                         }}
                         onChange={(e) => handleInputChange(e, key)}
                       />
@@ -229,7 +259,7 @@ export default function Education() {
                           borderRadius: "5px",
                         }}
                         InputProps={{
-                          disableUnderline: true,
+                          disableunderline: true,
                         }}
                         onChange={(e) => handleInputChange(e, key)}
                       />
@@ -244,7 +274,7 @@ export default function Education() {
                         inputProps={{
                           inputMode: "numeric",
                           maxLength: 4,
-                          disableUnderline: true,
+                          disableunderline: true,
                         }}
                         sx={{
                           borderRadius: "5px",
@@ -283,7 +313,7 @@ export default function Education() {
                           inputProps={{
                             inputMode: "numeric",
                             maxLength: 4,
-                            disableUnderline: true,
+                            disableunderline: true,
                           }}
                           sx={{
                             width: '100%',
@@ -317,7 +347,7 @@ export default function Education() {
                           borderRadius: "5px",
                         }}
                         InputProps={{
-                          disableUnderline: true,
+                          disableunderline: true,
                         }}
                         onChange={(e) => handleInputChange(e, key)}
                       />

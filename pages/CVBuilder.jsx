@@ -99,6 +99,16 @@ export default function CVBuilder() {
     },
   ]);
 
+  const [certifications, setCertifications] = useState([
+    {
+      title: "",
+      organization: "",
+      issueDate: "",
+      credentialUrl: "",
+      description: ""
+    }
+  ])
+
   const [extraCurricularDetails, setExtraCurricularDetails] = useState([
     {
       title: "",
@@ -260,6 +270,7 @@ export default function CVBuilder() {
             skills: [skillDetails, setSkillDetails],
             project: [projectDetails, setProjectDetails],
             extraCurricular: [extraCurricularDetails, setExtraCurricularDetails],
+            certification: [certifications, setCertifications],
             languages: [languageDetails, setLanguageDetails],
             hobbies: [hobbiesDetails, setHobbiesDetails],
             reference: [referenceDetails, setReferenceDetails],
@@ -321,18 +332,18 @@ export default function CVBuilder() {
                         xs: 0,
                         sm: 5,
                         md: 10,
-                        lg: 15
+                        lg: 0
                       },
                       width: {
                         xs: '100%',
                         sm: '90%',
-                        lg: '45%'
+                        lg: '50%'
                       },
                       zIndex: 1000,
                       padding: '25px',
                       backgroundColor: 'rgba(255, 255, 255, 0.9)',
                       transition: 'background-color 0.3s ease',
-                      ...(isScrolled && { backgroundColor: 'rgb(255, 255, 255, 0.2)', backdropFilter: 'blur(10px)' })
+                      ...(isScrolled && { backgroundColor: 'rgb(255, 255, 255, 0.2)', backdropFilter: 'blur(50px)' })
                     }}
                   >
                     <Typography>Profile Completeness <span style={{ color: progressBarColor }}>{profileCompleteness}</span>&nbsp;%</Typography>

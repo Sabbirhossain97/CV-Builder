@@ -47,6 +47,7 @@ export default function Projects({
     setOpenModal(false)
     setDisabledEditor(false)
   }
+
   const handleClose = () => {
     setOpenModal(false)
     setDisabledEditor(false)
@@ -90,6 +91,7 @@ export default function Projects({
       },
     ]);
   };
+  
   const handleInputChange = (e, inputKey) => {
     const { name, value } = e.target;
     let clone = [...projectDetails];

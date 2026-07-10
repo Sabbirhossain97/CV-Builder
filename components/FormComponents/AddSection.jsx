@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import GTranslateOutlinedIcon from "@mui/icons-material/GTranslateOutlined";
+import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import SportsEsportsOutlinedIcon from "@mui/icons-material/SportsEsportsOutlined";
 import NordicWalkingOutlinedIcon from "@mui/icons-material/NordicWalkingOutlined";
 import AppsIcon from '@mui/icons-material/Apps';
@@ -9,6 +10,7 @@ import Projects from "./Projects";
 import ExtraCurricular from "./ExtraCurricular";
 import Hobbies from "./Hobbies";
 import Language from "./Language";
+import Certifications from "./Certifications";
 import References from "./References";
 import { Reference } from "../SvgComponents/SVG";
 
@@ -17,7 +19,6 @@ export default function AddSection({
   setCustomSection,
   deleteCustomSection,
 }) {
-
 
   const addSections = (sectionId, newSectionName) => {
     setCustomSection([
@@ -49,17 +50,17 @@ export default function AddSection({
     {
       id: 6,
       icon: (
-        <NordicWalkingOutlinedIcon
-          color="primary"
-          sx={{
+        <WorkspacePremiumIcon
+          style={{
             fontSize: "35px",
             ...{ color: customSection.map((item) => item.id).includes(6) ? "#bdbdbd" : "#1565c0" },
           }}
+          color="primary"
         />
       ),
-      name: "Extra-Curricular Activities",
+      name: "Certifications",
       component: (
-        <ExtraCurricular
+        <Certifications
           deleteCustomSection={deleteCustomSection}
           sectionId={6}
         />
@@ -68,7 +69,7 @@ export default function AddSection({
     {
       id: 7,
       icon: (
-        <SportsEsportsOutlinedIcon
+        <NordicWalkingOutlinedIcon
           color="primary"
           sx={{
             fontSize: "35px",
@@ -76,9 +77,9 @@ export default function AddSection({
           }}
         />
       ),
-      name: "Hobbies",
+      name: "Extra-Curricular Activities",
       component: (
-        <Hobbies
+        <ExtraCurricular
           deleteCustomSection={deleteCustomSection}
           sectionId={7}
         />
@@ -87,7 +88,7 @@ export default function AddSection({
     {
       id: 8,
       icon: (
-        <GTranslateOutlinedIcon
+        <SportsEsportsOutlinedIcon
           color="primary"
           sx={{
             fontSize: "35px",
@@ -95,9 +96,9 @@ export default function AddSection({
           }}
         />
       ),
-      name: "Languages",
+      name: "Hobbies",
       component: (
-        <Language
+        <Hobbies
           deleteCustomSection={deleteCustomSection}
           sectionId={8}
         />
@@ -106,13 +107,32 @@ export default function AddSection({
     {
       id: 9,
       icon: (
+        <GTranslateOutlinedIcon
+          color="primary"
+          sx={{
+            fontSize: "35px",
+            ...{ color: customSection.map((item) => item.id).includes(9) ? "#bdbdbd" : "#1565c0" },
+          }}
+        />
+      ),
+      name: "Languages",
+      component: (
+        <Language
+          deleteCustomSection={deleteCustomSection}
+          sectionId={9}
+        />
+      ),
+    },
+    {
+      id: 10,
+      icon: (
         <Reference customSection={customSection} />
       ),
       name: "References",
       component: (
         <References
           deleteCustomSection={deleteCustomSection}
-          sectionId={9}
+          sectionId={10}
         />
       ),
     },

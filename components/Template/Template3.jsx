@@ -12,9 +12,17 @@ import {
     parseActivityDetails,
     colorPicker,
     dateConverter,
+    fontPicker
 } from "../helpers/helpers";
+import {
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+} from "@mui/material";
+import CircularProgress from '@mui/material/CircularProgress';
 
-function Template3() {
+function Template3({ save, load, loading, draftLoading }) {
     const targetRef = useRef();
     const [colors, setColors] = useState("");
     const [tabValue, setTabValue] = useState("1");
@@ -28,6 +36,7 @@ function Template3() {
         socials,
         skills,
         project,
+        certification,
         extraCurricular,
         languages,
         hobbies,
@@ -46,9 +55,13 @@ function Template3() {
     const [showLangLevel] = langLevel || [];
     const [{ hobbies: interests } = {}] = hobbies || [{}];
     const [, setShowTemplate] = previewTemplate || [];
+    const [selectedFont, setSelectedFont] = useState("Inter, sans-serif");
 
-    const primaryColor = colors || "#2563eb";
-    const darkColor = colors || "#1d4ed8";
+    const handleFontChange = (font) => {
+        setSelectedFont(font);
+    };
+
+    const primaryColor = colors || "#1e2b40";
 
     const handleColorChange = (color) => {
         setColors(color);
@@ -79,15 +92,14 @@ function Template3() {
             <div
                 ref={targetRef}
                 id="template-wrapper"
+                style={{ fontFamily: selectedFont }}
                 className="mx-auto h-screen overflow-auto bg-gray-50 print:h-auto print:min-h-0 print:overflow-visible print:bg-white print:shadow-none"
             >
                 <main className="mx-auto min-h-[1120px] w-full max-w-[1000px] bg-white font-poppins text-gray-700 shadow-xl print:max-w-none print:shadow-none">
                     {/* Header */}
                     <header
                         className="p-7 md:p-10"
-                        style={{
-                            background: `linear-gradient(135deg, ${primaryColor}, ${darkColor})`,
-                        }}
+                        style={{ backgroundColor: colors || "#1e2b40" }}
                     >
                         <div className="flex flex-col items-center gap-7 md:flex-row">
                             <div className="flex justify-center">
@@ -299,6 +311,76 @@ function Template3() {
                                 </section>
                             )}
 
+                            {hasData(certification, [
+                                "title",
+                                "organization",
+                                "issueDate",
+                                "credentialUrl",
+                                "description",
+                            ]) && (
+                                    <section className="mb-9">
+                                        <SectionTitle title="Certifications" />
+
+                                        <div className="space-y-5">
+                                            {certification[0]
+                                                .filter(
+                                                    (cert) =>
+                                                        cert.title ||
+                                                        cert.organization ||
+                                                        cert.issueDate ||
+                                                        cert.credentialUrl ||
+                                                        cert.description
+                                                )
+                                                .map((cert, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className="relative border-l-2 border-blue-100 pl-6"
+                                                    >
+                                                        <span
+                                                            className="absolute -left-[7px] top-1 h-3 w-3 rounded-full"
+                                                            style={{ backgroundColor: primaryColor }}
+                                                        />
+
+                                                        {cert.title && (
+                                                            <h3 className="text-[16px] font-bold text-gray-800">
+                                                                {cert.title}
+                                                            </h3>
+                                                        )}
+
+                                                        {(cert.organization || cert.issueDate) && (
+                                                            <p
+                                                                className="mt-1 text-[12px] font-semibold"
+                                                                style={{ color: primaryColor }}
+                                                            >
+                                                                {cert.organization}
+                                                                {cert.organization && cert.issueDate ? " | " : ""}
+                                                                {cert.issueDate}
+                                                            </p>
+                                                        )}
+
+                                                        {cert.credentialUrl && (
+                                                            <a
+                                                                href={cert.credentialUrl}
+                                                                target="_blank"
+                                                                rel="noreferrer"
+                                                                className="mt-1 block break-all text-[12px] font-semibold hover:underline"
+                                                                style={{ color: primaryColor }}
+                                                            >
+                                                                View Credential ↗
+                                                            </a>
+                                                        )}
+
+                                                        {cert.description && (
+                                                            <p className="mt-2 break-words text-[13px] leading-5 text-gray-600">
+                                                                {cert.description}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                        </div>
+                                    </section>
+                                )}
+
                             {hasData(extraCurricular, [
                                 "role",
                                 "title",
@@ -423,35 +505,52 @@ function Template3() {
                                 <section className="mb-9">
                                     <SectionTitle title="Skills" />
 
-                                    <div className="space-y-4">
-                                        {skills[0]
-                                            .filter((skill) => skill.skill)
-                                            .map((skill, index) => {
+                                    {!showExpLevel ? (
+                                        <div className="mt-2 flex flex-wrap gap-x-2 gap-y-1">
+                                            {skills[0]
+                                                .filter((skill) => skill.skill)
+                                                .map((skill, index) => (
+                                                    <span
+                                                        key={index}
+                                                        className="rounded-md bg-gray-100 px-2 py-1 text-[12px] font-semibold text-gray-700"
+                                                    >
+                                                        {skill.skill}
+                                                    </span>
+                                                ))}
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            {skills[0]
+                                                .filter((skill) => skill.skill)
+                                                .map((skill, index) => {
+                                                    const percentage = skill.levelCount
+                                                        ? (skill.levelCount / 5) * 100
+                                                        : 0;
 
-                                                const percentage = skill.levelCount ? (skill.levelCount / 5) * 100 : 0;
+                                                    return (
+                                                        <div key={index}>
+                                                            <div className="mb-1.5 flex items-center justify-between gap-3">
+                                                                <p className="break-words text-[13px] font-semibold text-gray-700">
+                                                                    {skill.skill}
+                                                                </p>
+                                                            </div>
 
-                                                return (
-                                                    <div key={index}>
-                                                        <div className="mb-1.5 flex items-center justify-between gap-3">
-                                                            <p className="break-words text-[13px] font-semibold text-gray-700">
-                                                                {skill.skill}
-                                                            </p>
-
+                                                            {skill.levelCount && (
+                                                                <div className="h-2 overflow-hidden rounded-full bg-gray-200">
+                                                                    <div
+                                                                        className="h-full rounded-full transition-all"
+                                                                        style={{
+                                                                            width: `${percentage}%`,
+                                                                            backgroundColor: primaryColor,
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            )}
                                                         </div>
-
-                                                        {showExpLevel && skill.levelCount && <div className="h-2 overflow-hidden rounded-full bg-gray-200">
-                                                            <div
-                                                                className="h-full rounded-full transition-all"
-                                                                style={{
-                                                                    width: `${percentage}%`,
-                                                                    backgroundColor: primaryColor,
-                                                                }}
-                                                            />
-                                                        </div>}
-                                                    </div>
-                                                );
-                                            })}
-                                    </div>
+                                                    );
+                                                })}
+                                        </div>
+                                    )}
                                 </section>
                             )}
 
@@ -608,18 +707,83 @@ function Template3() {
             </div>
 
             <div className="flex w-full gap-2 py-5">
-                {colorPicker.map((color, index) => (
-                    <Tooltip key={index} title={color.name}>
-                        <button
-                            type="button"
-                            onClick={() => handleColorChange(color.name)}
-                            className="h-10 w-8 rounded-md border transition hover:border-2"
-                            style={{ backgroundColor: color.name }}
-                        />
-                    </Tooltip>
-                ))}
+                <div className="flex items-center gap-2">
+                    <FormControl size="small" sx={{ minWidth: 160, backgroundColor: "white" }}>
+                        <InputLabel id="color-picker-label">Color</InputLabel>
 
-                <div className="ml-auto flex items-center gap-3">
+                        <Select
+                            labelId="color-picker-label"
+                            id="color-picker"
+                            value={colors || "#1e293b"}
+                            label="Color"
+                            onChange={(e) => handleColorChange(e.target.value)}
+                            renderValue={(selected) => {
+                                const selectedColor = colorPicker.find(
+                                    (color) => color.name === selected
+                                );
+
+                                return (
+                                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                        <Box
+                                            sx={{
+                                                width: 14,
+                                                height: 14,
+                                                borderRadius: "50%",
+                                                backgroundColor: selectedColor?.name,
+                                                border: "1px solid #ccc",
+                                            }}
+                                        />
+                                        {selectedColor?.label}
+                                    </Box>
+                                );
+                            }}
+                        >
+                            {colorPicker.map((color) => (
+                                <MenuItem key={color.name} value={color.name}>
+                                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                        <Box
+                                            sx={{
+                                                width: 14,
+                                                height: 14,
+                                                borderRadius: "50%",
+                                                backgroundColor: color.name,
+                                                border: "1px solid #ccc",
+                                            }}
+                                        />
+                                        {color.label}
+                                    </Box>
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </div>
+                <div className="flex items-center gap-2">
+                    <FormControl size="small" sx={{ minWidth: 180, backgroundColor: "white" }}>
+                        <InputLabel id="font-picker-label">Font Style</InputLabel>
+
+                        <Select
+                            labelId="font-picker-label"
+                            id="font-picker"
+                            value={selectedFont}
+                            label="Font Style"
+                            onChange={(e) => setSelectedFont(e.target.value)}
+                        >
+                            {fontPicker.map((font) => (
+                                <MenuItem
+                                    key={font.value}
+                                    value={font.value}
+                                    sx={{ fontFamily: font.value }}
+                                >
+                                    {font.label}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </div>
+
+                <div className="ml-auto flex gap-4 items-center">
+                    <button onClick={load} className='bg-gray-600 transition hover:bg-slate-700 text-white p-3 rounded-md py-3 text-sm'>{draftLoading ? <CircularProgress style={{ color: 'white' }} size="14px" aria-label="Loading…" /> : null} <span className='ml-2'>{draftLoading ? "loading" : "Load Draft"}</span> </button>
+                    <button onClick={save} className='bg-green-600 flex items-center transition hover:bg-slate-700 text-white p-3 rounded-md py-3 text-sm'> {loading ? <CircularProgress style={{ color: 'white' }} size="14px" aria-label="Loading…" /> : null} <span className='ml-2'>{loading ? "saving" : "Save Draft"}</span></button>
                     <ReactToPrint
                         trigger={() => (
                             <button className="rounded-md bg-slate-800 text-white px-4 py-3 text-sm transition hover:bg-slate-700">

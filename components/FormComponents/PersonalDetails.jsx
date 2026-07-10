@@ -156,7 +156,7 @@ export default function PersonalDetails() {
                   borderRadius: "5px",
                 }}
                 InputProps={{
-                  disableUnderline: true,
+                  disableunderline: true,
                 }}
                 onChange={(e) => handleInputChange(e, key)}
               />
@@ -173,7 +173,7 @@ export default function PersonalDetails() {
                   borderRadius: "5px",
                 }}
                 InputProps={{
-                  disableUnderline: true,
+                  disableunderline: true,
                 }}
                 onChange={(e) => handleInputChange(e, key)}
               />
@@ -190,7 +190,7 @@ export default function PersonalDetails() {
                   borderRadius: "5px",
                 }}
                 InputProps={{
-                  disableUnderline: true,
+                  disableunderline: true,
                 }}
                 onChange={(e) => handleInputChange(e, key)}
               />

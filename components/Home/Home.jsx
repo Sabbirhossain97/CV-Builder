@@ -3,6 +3,7 @@ import Image from "next/legacy/image";
 import Button from "@mui/material/Button";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import HandymanIcon from "@mui/icons-material/Handyman";
+import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
@@ -142,7 +143,7 @@ export default function Home() {
             </Typography>
           </Box>
           <Box
-            style={{ display: "flex", flexDirection: "row", marginTop: "30px" }}
+            style={{ display: "flex", alignItems: 'center', flexDirection: "row", marginTop: "30px" }}
           >
             <PictureAsPdfIcon
               style={{ width: "32px", height: "32px", opacity: "0.6" }}
@@ -163,7 +164,28 @@ export default function Home() {
             </Typography>
           </Box>
           <Box
-            style={{ display: "flex", flexDirection: "row", marginTop: "30px" }}
+            style={{ display: "flex", alignItems: 'center', flexDirection: "row", marginTop: "30px" }}
+          >
+            <TextSnippetIcon
+              style={{ width: "32px", height: "32px", opacity: "0.6" }}
+            />
+            <Typography
+              style={{
+                marginLeft: "19px",
+                fontWeight: "600",
+                fontSize: {
+                  xs: '15px',
+                  sm: "18px",
+                  md: '20px',
+                  lg: '25px'
+                },
+              }}
+            >
+              Choose Various Templates
+            </Typography>
+          </Box>
+          <Box
+            style={{ display: "flex", alignItems: 'center', flexDirection: "row", marginTop: "30px" }}
           >
             <DownloadOutlinedIcon
               style={{ width: "32px", height: "32px", opacity: "0.6" }}

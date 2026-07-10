@@ -77,27 +77,111 @@ export const parseActivityDetails = (activityDettails) => {
 
 export const colorPicker = [
     {
-        name: "#64748b",
-    },
-    {
-        name: "#eab308",
-    },
-    {
-        name: "#22c55e",
-    },
-    {
-        name: "#1e40af",
-    },
-    {
-        name: "#14b8a6",
-    },
-    {
-        name: "#6b21a8",
-    },
-    {
         name: "#1e293b",
+        label: "Slate",
     },
-]
+    {
+        name: "#334155",
+        label: "Dark Gray",
+    },
+    {
+        name: "#111827",
+        label: "Black",
+    },
+    {
+        name: "#1d4ed8",
+        label: "Blue",
+    },
+    {
+        name: "#2563eb",
+        label: "Royal Blue",
+    },
+    {
+        name: "#0f766e",
+        label: "Teal",
+    },
+    {
+        name: "#059669",
+        label: "Emerald",
+    },
+    {
+        name: "#16a34a",
+        label: "Green",
+    },
+    {
+        name: "#7c3aed",
+        label: "Purple",
+    },
+    {
+        name: "#6d28d9",
+        label: "Deep Purple",
+    },
+    {
+        name: "#9f1239",
+        label: "Burgundy",
+    },
+    {
+        name: "#92400e",
+        label: "Brown",
+    },
+    {
+        name: "#b45309",
+        label: "Amber",
+    },
+];
+
+export const fontPicker = [
+    {
+        label: "Inter",
+        value: "Inter, sans-serif",
+        category: "Modern",
+    },
+    {
+        label: "Roboto",
+        value: "Roboto, sans-serif",
+        category: "Modern",
+    },
+    {
+        label: "Arial",
+        value: "Arial, sans-serif",
+        category: "Classic",
+    },
+    {
+        label: "Calibri",
+        value: "Calibri, sans-serif",
+        category: "Professional",
+    },
+    {
+        label: "Helvetica",
+        value: "Helvetica, Arial, sans-serif",
+        category: "Clean",
+    },
+    {
+        label: "Poppins",
+        value: "Poppins, sans-serif",
+        category: "Modern",
+    },
+    {
+        label: "Lato",
+        value: "Lato, sans-serif",
+        category: "Friendly",
+    },
+    {
+        label: "Open Sans",
+        value: "'Open Sans', sans-serif",
+        category: "Readable",
+    },
+    {
+        label: "Georgia",
+        value: "Georgia, serif",
+        category: "Elegant",
+    },
+    {
+        label: "Times New Roman",
+        value: "'Times New Roman', serif",
+        category: "Traditional",
+    },
+];
 
 export const dateConverter = (startDate, endDate, status) => {
     const convertedStartDate = `${months[Number(startDate.split("-")[1]) - 1]} ${startDate.split("-")[0]}`;
