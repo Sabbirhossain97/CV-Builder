@@ -28,7 +28,7 @@ export default function Footer() {
             <Typography
                 style={{ textAlign: "center", color: "white", fontWeight: "600" }}
             >
-                Developed by <a className='underline' target='_blank' href="https://github.com/Sabbirhossain97">Sabbir Hossain</a>
+                Developed by <a className='underline' target='_blank' rel="noreferrer" href="https://github.com/Sabbirhossain97">Sabbir Hossain</a>
             </Typography>
         </Box>
     )
