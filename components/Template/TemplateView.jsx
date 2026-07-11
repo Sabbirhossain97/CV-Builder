@@ -44,7 +44,8 @@ const TemplateView = () => {
   const [showLangLevel, setShowLangLevel] = langLevel;
   const [showExpLevel, setShowExpLevel] = skillExpLevel;
   const [saveLoading, setSaveLoading] = useState(false);
-  const [loadingDraft, setLoadingDraft] = useState(false)
+  const [loadingDraft, setLoadingDraft] = useState(false);
+  const [loadingDraftMessage, setLoadingDraftMessage] = useState("");
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -101,7 +102,7 @@ const TemplateView = () => {
     const savedResume = localStorage.getItem("cv-builder-resume-data");
 
     if (!savedResume) {
-      alert("No saved resume found.");
+      setLoadingDraftMessage("No saved resume found.");
       return;
     }
     
@@ -147,15 +148,13 @@ const TemplateView = () => {
   }
 
   const loadResume = () => {
-
-
     setLoadingDraft(true)
     setTimeout(() => {
       setLoadingDraft(false);
       setOpenDraft(true);
+      setLoadingDraftMessage("Draft loaded successfully")
       loadResumeDraft()
     }, 1500)
-
   };
 
   const handleClose = () => setOpen(false);
@@ -210,6 +209,7 @@ const TemplateView = () => {
             </Box>
           </Box>
         </Modal>
+        {/* Draft loader modal */}
         <Modal
           open={openDraft}
           onClose={handleCloseLoadDraftModal}
@@ -218,7 +218,7 @@ const TemplateView = () => {
         >
           <Box sx={modalStyles}>
             <Typography id="modal-modal-title" variant="h6" component="h2">
-              Draft loaded successfully
+             {loadingDraftMessage}
             </Typography>
             <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
               <Button onClick={handleCloseLoadDraftModal} variant="outlined" color="primary" sx={{ mr: 1 }}>
