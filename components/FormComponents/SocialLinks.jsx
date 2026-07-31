@@ -35,7 +35,6 @@ export default function SocialLinks() {
   };
 
   const [socialSites, setSocialSites] = getData.socials;
-  const [completedSections, setCompletedSections] = getData.completed
 
   const deleteAccordionSection = (id) => {
     const result = socialSites.filter((item, key) => {
@@ -81,32 +80,7 @@ export default function SocialLinks() {
     obj.icon = getIconForLabel(obj.label);
     clone[inputKey] = obj;
     setSocialSites([...clone]);
-    calculateProfileCompleteness();
   };
-
-  const calculateProfileCompleteness = () => {
-    const firstEntry = socialSites[0];
-
-    if (firstEntry) {
-      const allfieldsCompleted = Object.values(firstEntry).every(field => field !== "")
-
-      if (allfieldsCompleted) {
-        if (!completedSections.sections.includes("Socials")) {
-          setCompletedSections(prevState => ({
-            ...prevState,
-            sections: [...prevState.sections, "Socials"]
-          }));
-        }
-      } else {
-        if (completedSections.sections.includes("Socials")) {
-          setCompletedSections(prevState => ({
-            ...prevState,
-            sections: prevState.sections.filter(section => section !== "Socials")
-          }));
-        }
-      }
-    }
-  }
 
   return (
     <div>

@@ -30,7 +30,6 @@ export default function Employment() {
   };
 
   const [employmentDetails, setEmploymentDetails] = getData.employment;
-  const [completedSections, setCompletedSections] = getData.completed
   const [disabledEditor, setDisabledEditor] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
@@ -124,7 +123,6 @@ export default function Employment() {
     clone[inputKey] = currentEmployment;
 
     setEmploymentDetails(clone);
-    calculateProfileCompleteness(clone);
   };
 
   const handleDescriptionChange = (index, value) => {
@@ -148,7 +146,6 @@ export default function Employment() {
     };
 
     setEmploymentDetails(updatedEmploymentDetails);
-    calculateProfileCompleteness(updatedEmploymentDetails);
   };
 
   const isDescriptionCompleted = (description = "") => {
@@ -158,43 +155,6 @@ export default function Employment() {
       .trim();
 
     return plainText.length > 0;
-  };
-
-  const calculateProfileCompleteness = (details) => {
-    const firstEntry = details[0];
-
-    if (!firstEntry) return;
-
-    const allFieldsCompleted =
-      firstEntry.jobtitle.trim() !== "" &&
-      firstEntry.employer.trim() !== "" &&
-      firstEntry.startdate !== "" &&
-      firstEntry.city.trim() !== "" &&
-      isDescriptionCompleted(firstEntry.description) &&
-      (firstEntry.ongoing || firstEntry.enddate !== "");
-
-    setCompletedSections((prevState) => {
-      const hasExperience =
-        prevState.sections.includes("Experience");
-
-      if (allFieldsCompleted && !hasExperience) {
-        return {
-          ...prevState,
-          sections: [...prevState.sections, "Experience"],
-        };
-      }
-
-      if (!allFieldsCompleted && hasExperience) {
-        return {
-          ...prevState,
-          sections: prevState.sections.filter(
-            (section) => section !== "Experience"
-          ),
-        };
-      }
-
-      return prevState;
-    });
   };
 
   return (

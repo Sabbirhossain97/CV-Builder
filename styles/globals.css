@@ -1,6 +1,11 @@
 @tailwind base;
 
 @layer base {
+    html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 80px;
+    }
+
     img {
         @apply inline-block;
     }
@@ -8,7 +13,7 @@
 
 @media print {
 
-    html,
+    html 
     body {
         height: auto !important;
         overflow: visible !important;

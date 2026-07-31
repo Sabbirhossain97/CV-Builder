@@ -9,7 +9,6 @@ export default function ProfessionalSummary() {
   const getData = useContext(DataContext);
 
   const [professionalSummary, setProfessionalSummary] = getData.summary;
-  const [completedSections, setCompletedSections] = getData.completed
 
   const handleInputChange = (e, inputKey) => {
     const { name, value } = e.target;
@@ -18,29 +17,7 @@ export default function ProfessionalSummary() {
     obj[name] = value;
     clone[inputKey] = obj;
     setProfessionalSummary([...clone]);
-    calculateProfileCompleteness();
-
   };
-
-  const calculateProfileCompleteness = () => {
-    const allfieldsCompleted = professionalSummary.every(entry => Object.values(entry).every(field => field !== ""))
-
-    if (allfieldsCompleted) {
-      if (!completedSections.sections.includes("summary")) {
-        setCompletedSections(prevState => ({
-          ...prevState,
-          sections: [...prevState.sections, "summary"]
-        }));
-      }
-    } else {
-      if (completedSections.sections.includes("summary")) {
-        setCompletedSections(prevState => ({
-          ...prevState,
-          sections: prevState.sections.filter(section => section !== "summary")
-        }));
-      }
-    }
-  }
 
   return (
     <Box>

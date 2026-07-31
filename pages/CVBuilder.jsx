@@ -2,7 +2,7 @@ import React from "react";
 import Head from "next/head";
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import PersonalDetails from "../components/FormComponents/PersonalDetails";
 import Education from "../components/FormComponents/Education";
 import SocialLinks from "../components/FormComponents/SocialLinks";
@@ -28,6 +28,77 @@ import Modal from '@mui/material/Modal';
 import { modalStyles } from "../components/helpers/helpers";
 
 export const DataContext = React.createContext();
+
+const hasText = (value) =>
+  typeof value === "string" && value.trim().length > 0;
+
+const hasUploadedImage = (imageURLs) =>
+  Array.isArray(imageURLs) &&
+  imageURLs.some(
+    (url) => typeof url === "string" && url.trim() !== ""
+  );
+
+const hasRichText = (value = "") =>
+  value
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .trim().length > 0;
+
+const sectionValidators = {
+  
+  personalDetails: (details) => {
+    const item = details?.[0];
+
+    return Boolean(
+      item &&
+      hasText(item.firstname) &&
+      hasText(item.lastname) &&
+      hasText(item.email) &&
+      hasText(item.phone) &&
+      hasText(item.occupation)
+    );
+  },
+
+  summary: (details) =>
+    details?.some((item) => hasRichText(item.summary)) ?? false,
+
+  experience: (details) =>
+    details?.some(
+      (item) =>
+        hasText(item.jobtitle) &&
+        hasText(item.employer) &&
+        hasText(item.startdate) &&
+        hasText(item.city) &&
+        hasRichText(item.description) &&
+        (item.ongoing === true || hasText(item.enddate))
+    ) ?? false,
+
+  education: (details) =>
+    details?.some(
+      (item) =>
+        hasText(item.institution) &&
+        hasText(item.degree) &&
+        hasText(item.startdate) && 
+        (item.ongoing === true || hasText(item.enddate))
+    ) ?? false,
+
+  socialLinks: (details) =>
+    details?.some(
+      (item) =>
+        hasText(item.label || item.type) &&
+        hasText(item.linkurl)
+    ) ?? false,
+
+  skills: (details) =>
+    details?.some((item) => hasText(item.skill)) ?? false,
+
+  projects: (details) =>
+    details?.some(
+      (item) =>
+        hasText(item.projecttitle) &&
+        hasRichText(item.description)
+    ) ?? false,
+};
 
 export default function CVBuilder() {
   const router = useRouter();
@@ -80,7 +151,7 @@ export default function CVBuilder() {
   ]);
   const [skillDetails, setSkillDetails] = useState([
     {
-      id: crypto.randomUUID(), 
+      id: crypto.randomUUID(),
       skill: "",
       level: "",
       levelCount: null,
@@ -161,34 +232,72 @@ export default function CVBuilder() {
   const [showLangLevel, setShowLangLevel] = useState(false);
   const [showTemplate, setShowTemplate] = useState(false)
   const [windowWidth, setWindowWidth] = useState(null);
-  const [completedSections, setCompletedSections] = useState({
-    sections: []
-  });
-  const [profileCompleteness, setProfileCompleteness] = useState(null)
   const [progressBarColor, setProgressBarColor] = useState('red');
   const [isScrolled, setIsScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+
+  const completedSections = useMemo(() => {
+    const completed = [];
+
+    if (hasUploadedImage(imageURLs)) {
+      completed.push("Profile Image");
+    }
+
+    if (sectionValidators.personalDetails(personalDetails)) {
+      completed.push("Personal Details");
+    }
+
+    if (sectionValidators.summary(professionalSummary)) {
+      completed.push("Summary");
+    }
+
+    if (sectionValidators.experience(employmentDetails)) {
+      completed.push("Experience");
+    }
+
+    if (sectionValidators.education(educationDetails)) {
+      completed.push("Education");
+    }
+
+    if (sectionValidators.socialLinks(socialLinksDetails)) {
+      completed.push("Social Links");
+    }
+
+    if (sectionValidators.skills(skillDetails)) {
+      completed.push("Skills");
+    }
+
+    return completed;
+  }, [
+    imageURLs,
+    personalDetails,
+    professionalSummary,
+    employmentDetails,
+    educationDetails,
+    socialLinksDetails,
+    skillDetails,
+    projectDetails,
+  ]);
+
+  const TOTAL_CORE_SECTIONS = 7;
+
+  const profileCompleteness = Math.round(
+    (completedSections.length / TOTAL_CORE_SECTIONS) * 100
+  );
 
   const deleteCustomSection = (sectionId) => {
     setCustomSection(prevSections => prevSections.filter(section => section.id !== sectionId))
   };
 
   useEffect(() => {
-    const completed = completedSections.sections.length;
-    const totalSections = 7;
-    setProfileCompleteness(Math.round((completed / totalSections * 100).toFixed(2)))
-  }, [completedSections])
-
-  useEffect(() => {
     if (profileCompleteness < 50) {
-      setProgressBarColor('red')
-    } else if (profileCompleteness > 50 && profileCompleteness < 80) {
-      setProgressBarColor('#f57f17')
-    } else if (profileCompleteness > 80) {
-      setProgressBarColor('green')
+      setProgressBarColor("red");
+    } else if (profileCompleteness < 80) {
+      setProgressBarColor("#f57f17");
+    } else {
+      setProgressBarColor("green");
     }
-  }, [profileCompleteness, progressBarColor])
-
+  }, [profileCompleteness]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -252,7 +361,6 @@ export default function CVBuilder() {
           },
           height: "100%",
         }}
-
       >
 
         <Head>
@@ -277,7 +385,8 @@ export default function CVBuilder() {
             skillExpLevel: [showExpLevel, setShowExpLevel],
             langLevel: [showLangLevel, setShowLangLevel],
             previewTemplate: [showTemplate, setShowTemplate],
-            completed: [completedSections, setCompletedSections]
+            completedSections,
+            profileCompleteness
           }}
         >
           <Box
@@ -452,25 +561,25 @@ export default function CVBuilder() {
             }
           </Box>
           {/* template section start */}
-            <Box
-              sx={{
-                display: {
-                  xs: "none",
-                  lg: "block",
-                },
-                width: {
-                  lg: "50%",
-                  xl: "50%",
-                },
-                position: {
-                  lg: "fixed",
-                  xl: "fixed",
-                },
-                top: 0,
-                right: 0,
-                height: "100%",
-              }}
-            >
+          <Box
+            sx={{
+              display: {
+                xs: "none",
+                lg: "block",
+              },
+              width: {
+                lg: "50%",
+                xl: "50%",
+              },
+              position: {
+                lg: "fixed",
+                xl: "fixed",
+              },
+              top: 0,
+              right: 0,
+              height: "100%",
+            }}
+          >
             <TemplateView />
           </Box>
           {/* template section end */}
