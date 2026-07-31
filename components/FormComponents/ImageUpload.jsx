@@ -17,7 +17,6 @@ export default function Practice() {
   const router = useRouter();
   const [imageData, setImageData] = getData.image;
   const [imageUrlData, setImageUrlData] = getData.imageUrls;
-  const [completedSections, setCompletedSections] = getData.completed
 
   const [open, setOpen] = useState(false);
 
@@ -40,36 +39,14 @@ export default function Practice() {
     return imageUrlData;
   };
 
-  const calculateProfileCompleteness = useCallback(() => {
-
-    if (imageData.length > 0) {
-      if (!completedSections.sections.includes("Image")) {
-        setCompletedSections(prevState => ({
-          ...prevState,
-          sections: [...prevState.sections, "Image"]
-        }));
-      }
-    } else {
-      if (completedSections.sections.includes("Image")) {
-        setCompletedSections(prevState => ({
-          ...prevState,
-          sections: prevState.sections.filter(section => section !== "Image")
-        }));
-      }
-    }
-  }, [imageData, completedSections, setCompletedSections])
-
-
   useEffect(() => {
     if (imageData.length < 1) {
-      calculateProfileCompleteness()
       return
     };
     const newImageUrls = [];
     imageData.forEach((image) => newImageUrls.push(URL.createObjectURL(image)));
     setImageUrlData(newImageUrls);
-    calculateProfileCompleteness()
-  }, [imageData, setImageUrlData, calculateProfileCompleteness,setCompletedSections]);
+  }, [imageData, setImageUrlData,]);
 
 
   return (

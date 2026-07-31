@@ -10,8 +10,6 @@ export default function PersonalDetails() {
   const getData = useContext(DataContext);
   const [stateValue, setStateValue] = getData.personalInformation;
 
-  const [completedSections, setCompletedSections] = getData.completed
-
   const handleInputChange = (e, inputKey) => {
     const { name, value } = e.target;
     let clone = [...stateValue];
@@ -19,28 +17,7 @@ export default function PersonalDetails() {
     obj[name] = value;
     clone[inputKey] = obj;
     setStateValue([...clone]);
-    calculateProfileCompleteness();
   };
-
-  const calculateProfileCompleteness = () => {
-    const allfieldsCompleted = stateValue.every(entry => Object.values(entry).every(field => field !== ""))
-
-    if (allfieldsCompleted) {
-      if (!completedSections.sections.includes("personal Details")) {
-        setCompletedSections(prevState => ({
-          ...prevState,
-          sections: [...prevState.sections, "personal Details"]
-        }));
-      }
-    } else {
-      if (completedSections.sections.includes("personal Details")) {
-        setCompletedSections(prevState => ({
-          ...prevState,
-          sections: prevState.sections.filter(section => section !== "personal Details")
-        }));
-      }
-    }
-  }
 
   return (
     <Box >

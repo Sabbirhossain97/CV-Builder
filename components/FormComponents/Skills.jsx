@@ -180,7 +180,6 @@ export default function Skills() {
 
   const [skillDetails, setSkillDetails] = getData.skills;
   const [showExpLevel, setShowExpLevel] = getData.skillExpLevel;
-  const [completedSections, setCompletedSections] = getData.completed;
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -256,35 +255,7 @@ export default function Skills() {
     obj["levelCount"] = counter
     clone[inputKey] = obj;
     setSkillDetails([...clone]);
-    calculateProfileCompleteness();
   };
-
-  const calculateProfileCompleteness = () => {
-    const firstEntry = skillDetails[0];
-
-    if (firstEntry) {
-      const allfieldsCompleted = 
-        firstEntry.id !== "" &&
-        firstEntry.skill !== "" 
-
-      if (allfieldsCompleted) {
-        if (!completedSections.sections.includes("Skills")) {
-          setCompletedSections(prevState => ({
-            ...prevState,
-            sections: [...prevState.sections, "Skills"]
-          }));
-        }
-      } else {
-        if (completedSections.sections.includes("Skills")) {
-          setCompletedSections(prevState => ({
-            ...prevState,
-            sections: prevState.sections.filter(section => section !== "Skills")
-          }));
-        }
-      }
-    }
-  }
-
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column" }}>

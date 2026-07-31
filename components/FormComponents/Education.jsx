@@ -25,7 +25,6 @@ export default function Education() {
   };
 
   const [educationDetails, setEducationDetails] = getData.education;
-  const [completedSections, setCompletedSections] = getData.completed;
 
   const showAlert = (message) => {
     setAlertOpen(true);
@@ -141,50 +140,6 @@ export default function Education() {
     clone[inputKey] = currentEducation;
 
     setEducationDetails(clone);
-    calculateProfileCompleteness(clone);
-  };
-
-  const calculateProfileCompleteness = (details) => {
-    const firstEntry = details[0];
-
-    if (!firstEntry) return;
-
-    const allFieldsCompleted =
-      firstEntry.degree.trim() !== "" &&
-      firstEntry.institution.trim() !== "" &&
-      firstEntry.institutioncity.trim() !== "" &&
-      firstEntry.startdate !== "" &&
-      isValidYear(firstEntry.startdate) &&
-      (
-        firstEntry.ongoing ||
-        (
-          firstEntry.enddate !== "" &&
-          isValidYear(firstEntry.enddate)
-        )
-      );
-
-    setCompletedSections((prevState) => {
-      const hasEducation =
-        prevState.sections.includes("Education");
-
-      if (allFieldsCompleted && !hasEducation) {
-        return {
-          ...prevState,
-          sections: [...prevState.sections, "Education"],
-        };
-      }
-
-      if (!allFieldsCompleted && hasEducation) {
-        return {
-          ...prevState,
-          sections: prevState.sections.filter(
-            (section) => section !== "Education"
-          ),
-        };
-      }
-
-      return prevState;
-    });
   };
 
   return (
