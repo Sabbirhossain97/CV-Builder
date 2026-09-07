@@ -209,7 +209,7 @@ function Template3({ save, load, loading, exportJSON, importJSON, draftLoading }
                                     <section className="mb-9">
                                         <SectionTitle title="Professional Summary" />
 
-                                        <p className="break-words text-[13px] leading-6 text-gray-600">
+                                        <p className="text-[13px] leading-[1.7] text-gray-600 text-justify">
                                             {about}
                                         </p>
                                     </section>

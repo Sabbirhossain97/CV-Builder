@@ -292,7 +292,7 @@ function Template2({ save, load, loading, exportJSON, importJSON, draftLoading }
 
                                     <div className="mt-0 h-[1px] w-full bg-white/40" />
 
-                                    <p className="mt-2 break-words text-[13px] leading-[1.55]">
+                                    <p className="mt-2 text-justify text-[13px] leading-[1.55]">
                                         {about}
                                     </p>
                                 </section>
